@@ -1,23 +1,11 @@
 package jp.co.worksap.oss.findbugs.guava;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyByte;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.apache.bcel.Constants;
-import org.apache.bcel.classfile.AnnotationEntry;
-import org.apache.bcel.classfile.Attribute;
-import org.apache.bcel.classfile.Constant;
-import org.apache.bcel.classfile.ConstantPool;
-import org.apache.bcel.classfile.ConstantUtf8;
-import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.classfile.Method;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,9 +17,12 @@ import com.google.common.annotations.VisibleForTesting;
 
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
+import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
-import edu.umd.cs.findbugs.classfile.MethodDescriptor;
+import edu.umd.cs.findbugs.classfile.analysis.AnnotationValue;
+import edu.umd.cs.findbugs.classfile.analysis.MethodInfo;
+import edu.umd.cs.findbugs.classfile.analysis.MethodInfo.Builder;
 
 
 /**
@@ -75,50 +66,18 @@ public class UnexpectedAccessDetectorTest {
 	public void testVerifyVisibility() throws Exception {
 		UnexpectedAccessDetector detector = new UnexpectedAccessDetector(bugReporter);
 		ClassDescriptor invokedClassDescriptor;
-		MethodDescriptor invokedMethodDescriptor;
+		XMethod invokedMethodDescriptor;
 
 		invokedClassDescriptor = DescriptorFactory.createClassDescriptor(Object.class);
-		invokedMethodDescriptor = DescriptorFactory.instance().getMethodDescriptor("java/lang/Object", "equals", "(Ljava/lang/Object;)Z", false);
+		invokedMethodDescriptor = new MethodInfo.Builder("java/lang/Object", "equals", "(Ljava/lang/Object;)Z", 0).build();
 		detector.verifyVisibility(invokedClassDescriptor, invokedMethodDescriptor, false);
 
 		invokedClassDescriptor = DescriptorFactory.createClassDescriptor(TestClass.class);
-		invokedMethodDescriptor = DescriptorFactory.instance().getMethodDescriptor("jp/co/worksap/oss/findbugs/guava/TestClass", "test", "()V", false);
-
-		detector.verifyVisibility(invokedClassDescriptor, invokedMethodDescriptor, false);
+		Builder builder = new MethodInfo.Builder("jp/co/worksap/oss/findbugs/guava/TestClass", "test", "()V", 0);
+		builder.addAnnotation("Lcom/google/common/annotations/VisibleForTesting;", new AnnotationValue("com/google/common/annotations/VisibleForTesting"));
+		detector.verifyVisibility(invokedClassDescriptor, builder.build(), false);
+		
 		verify(bugReporter).reportBug(any(BugInstance.class));
-	}
-
-	/**
-	 * Tests searching for {@link Method}s of a {@link JavaClass}
-	 */
-	@Test
-	public void testFindMethod() {
-		UnexpectedAccessDetector detector = new UnexpectedAccessDetector(bugReporter);
-		ConstantPool constant_pool = mock(ConstantPool.class);
-		JavaClass bcelClass = mock(JavaClass.class);
-
-		Method testMethod = new Method();
-		int name_index = 0;
-		int signature_index = 1;
-		testMethod.setNameIndex(name_index);
-		testMethod.setSignatureIndex(signature_index);
-		testMethod.setConstantPool(constant_pool);
-		Constant nameConstant = new ConstantUtf8("equals");
-		Constant signatureConstant = new ConstantUtf8("(Ljava/lang/Object;)Z");
-
-		when(constant_pool.getConstant(eq(name_index), anyByte())).thenReturn(nameConstant);
-		when(constant_pool.getConstant(eq(signature_index), anyByte())).thenReturn(signatureConstant);
-
-		Method[] methods = { testMethod };
-		when(bcelClass.getMethods()).thenReturn(methods);
-		when(bcelClass.getClassName()).thenReturn("java.lang.Object");
-
-		MethodDescriptor invokedMethod = new MethodDescriptor("java/lang/Object", "equals", "(Ljava/lang/Object;)Z", false); //   mock(MethodDescriptor.class);
-
-		Method method = detector.findMethod(bcelClass, invokedMethod);
-
-		assertNotNull(method);
-
 	}
 
 	/**
@@ -127,20 +86,17 @@ public class UnexpectedAccessDetectorTest {
 	@Test
 	public void testCheckVisibility() {
 		UnexpectedAccessDetector detector = new UnexpectedAccessDetector(bugReporter);
-		Method privateMethod = new Method();
-		privateMethod.setModifiers(Opcodes.ACC_PRIVATE);
-		assertFalse(detector.checkVisibility(privateMethod));
+		Builder methodBuilder = new MethodInfo.Builder("java/lang/Object", "equals", "(Ljava/lang/Object;)Z", Opcodes.ACC_PRIVATE);
+		assertFalse(detector.checkVisibility(methodBuilder.build()));
 
-		Method protectedMethod = new Method();
-		protectedMethod.setModifiers(Opcodes.ACC_PROTECTED);
-		assertFalse(detector.checkVisibility(protectedMethod));
+		methodBuilder.setAccessFlags(Opcodes.ACC_PROTECTED);
+		assertFalse(detector.checkVisibility(methodBuilder.build()));
 
-		Method publicMethod = new Method();
-		publicMethod.setModifiers(Opcodes.ACC_PUBLIC);
-		assertFalse(detector.checkVisibility(publicMethod));
+		methodBuilder.setAccessFlags(Opcodes.ACC_PUBLIC);
+		assertFalse(detector.checkVisibility(methodBuilder.build()));
 
-		Method defaultVisibilityMethod = new Method();
-		assertTrue(detector.checkVisibility(defaultVisibilityMethod));
+		methodBuilder.setAccessFlags(0);
+		assertTrue(detector.checkVisibility(methodBuilder.build()));
 	}
 
 	/**
@@ -149,22 +105,15 @@ public class UnexpectedAccessDetectorTest {
 	@Test
 	public void testCheckAnnotated() {
 		UnexpectedAccessDetector detector = new UnexpectedAccessDetector(bugReporter);
-		Method method = new Method();
-		method.setAttributes(new Attribute[] {});
+		Builder methodBuilder = new MethodInfo.Builder("java/lang/Object", "equals", "(Ljava/lang/Object;)Z", Opcodes.ACC_PUBLIC);
 
-		assertFalse(detector.checkAnnotated(method));
+		assertFalse(detector.checkAnnotated(methodBuilder.build()));
 
-		AnnotationEntry someAnnotationEntry = mock(AnnotationEntry.class);
-		when(someAnnotationEntry.getAnnotationType()).thenReturn("Lorg/junit/Test;");
-		method.addAnnotationEntry(someAnnotationEntry);
+		methodBuilder.addAnnotation("Lorg/junit/Test;", new AnnotationValue("org/junit/Test"));
+		assertFalse(detector.checkAnnotated(methodBuilder.build()));
 
-		assertFalse(detector.checkAnnotated(method));
-
-		AnnotationEntry visibleForTestingAnnotationEntry = mock(AnnotationEntry.class);
-		when(visibleForTestingAnnotationEntry.getAnnotationType()).thenReturn("Lcom/google/common/annotations/VisibleForTesting;");
-		method.addAnnotationEntry(visibleForTestingAnnotationEntry);
-
-		assertTrue(detector.checkAnnotated(method));
+		methodBuilder.addAnnotation("Lcom/google/common/annotations/VisibleForTesting;", new AnnotationValue("com/google/common/annotations/VisibleForTesting"));
+		assertTrue(detector.checkAnnotated(methodBuilder.build()));
 	}
 
 	/**
