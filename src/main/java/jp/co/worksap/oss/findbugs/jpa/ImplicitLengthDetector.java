@@ -32,9 +32,11 @@ public class ImplicitLengthDetector extends AbstractColumnDetector {
         }
 
         if (! elements.containsKey("length")) {
-            BugInstance bug = new BugInstance(this, "IMPLICIT_LENGTH", HIGH_PRIORITY);
+            BugInstance bug = new BugInstance(this, "IMPLICIT_LENGTH", HIGH_PRIORITY).addClass(this);
             if (visitingMethod()) {
                 bug.addMethod(this);
+            } else if (visitingField()) {
+            	bug.addField(this);
             }
             getBugReporter().reportBug(bug);
         } else {

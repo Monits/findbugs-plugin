@@ -43,7 +43,7 @@ public class ColumnDefinitionDetector extends AnnotationDetector {
     private void detectExistence(@Nonnull ElementValue columnDefinition) {
         String value = columnDefinition.stringifyValue();
         if (!value.isEmpty()) {
-            reporter.reportBug(new BugInstance(this, "USE_COLUMN_DEFINITION", NORMAL_PRIORITY));
+            reporter.reportBug(new BugInstance(this, "USE_COLUMN_DEFINITION", NORMAL_PRIORITY).addClass(this).addField(this));
         }
     }
 

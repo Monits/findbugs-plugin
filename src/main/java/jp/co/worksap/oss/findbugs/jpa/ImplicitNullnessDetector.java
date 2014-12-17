@@ -18,9 +18,11 @@ public class ImplicitNullnessDetector extends AbstractColumnDetector {
     protected void verifyColumn(Type columnType,
             Map<String, ElementValue> elements) {
         if (! elements.containsKey("nullable")) {
-            BugInstance bug = new BugInstance(this, "IMPLICIT_NULLNESS", HIGH_PRIORITY);
+            BugInstance bug = new BugInstance(this, "IMPLICIT_NULLNESS", HIGH_PRIORITY).addClass(this);
             if (visitingMethod()) {
                 bug.addMethod(this);
+            } else if (visitingField()) {
+             	bug.addField(this);
             }
             getBugReporter().reportBug(bug);
         }
