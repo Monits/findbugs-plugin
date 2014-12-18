@@ -3,6 +3,7 @@ package jp.co.worksap.oss.findbugs.jsr305.nullness;
 
 import java.lang.annotation.ElementType;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ReferenceType;
@@ -11,6 +12,7 @@ import org.apache.bcel.generic.Type;
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
+import edu.umd.cs.findbugs.ba.Hierarchy2;
 import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.ba.jsr305.JSR305NullnessAnnotations;
 import edu.umd.cs.findbugs.ba.jsr305.TypeQualifierAnnotation;
@@ -21,17 +23,28 @@ import edu.umd.cs.findbugs.classfile.analysis.AnnotatedObject;
 public class UnknownNullnessDetector extends BytecodeScanningDetector {
 
     private static final java.lang.reflect.Method GET_DEFAULT_ANNOTATION;
+    private static final TypeQualifierValue<?> NULLNESS_QUALIFIER
+    	= TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
+    
     private final BugReporter bugReporter;
 
     public UnknownNullnessDetector(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
     }
-
+    
     @Override
-    public void visitMethod(Method method) {
-        TypeQualifierValue<?> nullness = TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
-        detectUnknownNullnessOfParameter(method, nullness);
-        detectUnknowNullnessOfReturnedValue(method, nullness);
+    public void visit(final Method method) {
+    	/*
+    	 * Ignore inherited methods.. Nullness should be declared upstream
+    	 * This also prevents us from reporting on methods whose expected nullness we don't control,
+    	 * such as Object.equals and List.add.
+    	 */
+    	final Set<XMethod> superMethods = Hierarchy2.findSuperMethods(getXMethod());
+        if (superMethods.isEmpty()) {
+        	// Make sure our own annotations are in place
+        	detectUnknownNullnessOfParameter(method, NULLNESS_QUALIFIER);
+        	detectUnknowNullnessOfReturnedValue(method, NULLNESS_QUALIFIER);
+        }
     }
 
     private void detectUnknownNullnessOfParameter(Method method,
