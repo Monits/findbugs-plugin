@@ -52,9 +52,11 @@ public class ImplicitLengthDetector extends AbstractColumnDetector {
     }
 
     private void reportIllegalLength(int lengthValue) {
-        BugInstance bug = new BugInstance(this, "ILLEGAL_LENGTH", HIGH_PRIORITY);
+        BugInstance bug = new BugInstance(this, "ILLEGAL_LENGTH", HIGH_PRIORITY).addClass(this);
         if (visitingMethod()) {
             bug.addMethod(this);
+        } else if (visitingField()) {
+        	bug.addField(this);
         }
         getBugReporter().reportBug(bug);
     }

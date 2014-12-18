@@ -68,7 +68,7 @@
   <BugPattern type="UNKNOWN_NULLNESS_OF_PARAMETER">
     <ShortDescription>Nullness of this parameter is unknown.
     </ShortDescription>
-    <LongDescription>Nullness of this parameter is unknown.
+    <LongDescription>Nullness of parameter in method {1.name} of class {0} is unknown.
     </LongDescription>
     <Details>
   <![CDATA[
@@ -81,7 +81,7 @@
     <ShortDescription>Nullness of this returned value is unknown.
     </ShortDescription>
     <LongDescription>
-      Nullness of this returned value is unknown.
+      Nullness of returned value in method {1.name} of class {0} is unknown.
     </LongDescription>
     <Details>
   <![CDATA[
@@ -161,7 +161,7 @@
     <ShortDescription>Specify length of column, its default (255) might be not enough.
     </ShortDescription>
     <LongDescription>
-      Specify length of column, its default (255) might be not enough.
+      Specify length of column defined by {1.name}, its default (255) might be not enough.
     </LongDescription>
     <Details>
   <![CDATA[
@@ -215,7 +215,7 @@
     <ShortDescription>@Column annotation has columnDefinition property.
     </ShortDescription>
     <LongDescription>
-      @Column annotation has columnDefinition property, it might break RDBMS portability.
+      @Column annotation has columnDefinition property on {1.name}, it might break RDBMS portability.
     </LongDescription>
     <Details>
   <![CDATA[
