@@ -41,6 +41,20 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
+
+	<repositories>
+		<repository>
+			<id>monits-snapshots</id>
+			<url>http://nexus.monits.com/content/repositories/oss-snapshots/</url>
+			<name>Monits Snapshots</name>
+		</repository>
+		<repository>
+			<id>monits-releases</id>
+			<url>http://nexus.monits.com/content/repositories/oss-releases/</url>
+			<name>Monits Releases</name>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 			<plugin>
