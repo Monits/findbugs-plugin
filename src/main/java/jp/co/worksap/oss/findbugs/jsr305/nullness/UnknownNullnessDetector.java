@@ -3,7 +3,6 @@ package jp.co.worksap.oss.findbugs.jsr305.nullness;
 
 import java.lang.annotation.ElementType;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
 
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ReferenceType;
@@ -13,99 +12,152 @@ import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
 import edu.umd.cs.findbugs.ba.Hierarchy2;
+import edu.umd.cs.findbugs.ba.XClass;
 import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.ba.jsr305.JSR305NullnessAnnotations;
 import edu.umd.cs.findbugs.ba.jsr305.TypeQualifierAnnotation;
 import edu.umd.cs.findbugs.ba.jsr305.TypeQualifierApplications;
 import edu.umd.cs.findbugs.ba.jsr305.TypeQualifierValue;
+import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
+import edu.umd.cs.findbugs.classfile.ClassDescriptor;
+import edu.umd.cs.findbugs.classfile.Global;
 import edu.umd.cs.findbugs.classfile.analysis.AnnotatedObject;
 
 public class UnknownNullnessDetector extends BytecodeScanningDetector {
 
-    private static final java.lang.reflect.Method GET_DEFAULT_ANNOTATION;
-    private static final TypeQualifierValue<?> NULLNESS_QUALIFIER
-    	= TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
-    
-    private final BugReporter bugReporter;
+	private static final java.lang.reflect.Method GET_DEFAULT_ANNOTATION;
+	private static final TypeQualifierValue<?> NULLNESS_QUALIFIER
+		= TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
+	
+	private final BugReporter bugReporter;
 
-    public UnknownNullnessDetector(BugReporter bugReporter) {
-        this.bugReporter = bugReporter;
-    }
-    
-    @Override
-    public void visit(final Method method) {
-    	/*
-    	 * Ignore inherited methods.. Nullness should be declared upstream
-    	 * This also prevents us from reporting on methods whose expected nullness we don't control,
-    	 * such as Object.equals and List.add.
-    	 */
-    	final Set<XMethod> superMethods = Hierarchy2.findSuperMethods(getXMethod());
-        if (superMethods.isEmpty()) {
-        	// Make sure our own annotations are in place
-        	detectUnknownNullnessOfParameter(method, NULLNESS_QUALIFIER);
-        	detectUnknowNullnessOfReturnedValue(method, NULLNESS_QUALIFIER);
-        }
-    }
+	public UnknownNullnessDetector(BugReporter bugReporter) {
+		this.bugReporter = bugReporter;
+	}
+	
+	@Override
+	public void visit(final Method method) {
+		final XMethod xMethod = getXMethod();
+		if (xMethod.isSynthetic()) {
+			// Ignore methods not created by the developer himself
+			return;
+		}
+		
+		// Enums have several false positives we need to ignore...
+		if (isEnumIgnoredMethod(xMethod)) {
+			return;
+		}
+		
+		/*
+		 * Ignore inherited methods.. Nullness should be declared upstream
+		 * This also prevents us from reporting on methods whose expected nullness we don't control,
+		 * such as Object.equals and List.add.
+		 */
+		if (Hierarchy2.findFirstSuperMethod(xMethod) == null) {
+			// Make sure our own annotations are in place
+			detectUnknownNullnessOfParameter(method, NULLNESS_QUALIFIER);
+			detectUnknowNullnessOfReturnedValue(method, NULLNESS_QUALIFIER);
+		}
+	}
 
-    private void detectUnknownNullnessOfParameter(Method method,
-            TypeQualifierValue<?> nullness) {
-        Type[] argumentTypes = method.getArgumentTypes();
+	private boolean isEnumIgnoredMethod(final XMethod xMethod) {
+		boolean checkForEnum = false;
+		final String methodName = xMethod.getName();
+		final String signature = xMethod.getSignature();
+		
+		// public static CCC[] values()
+		if (methodName.equals("values") && xMethod.isStatic() && xMethod.getNumParams() == 0) {
+			checkForEnum = true;
+		}
+		
+		// public static CCC valueOf(String)
+		if (methodName.equals("valueOf") && xMethod.isStatic() && signature.equals("(Ljava/lang/String;)L" + xMethod.getClassDescriptor().getClassName() + ";")) {
+			checkForEnum = true;
+		}
+		
+		// super <init>(String, int)
+		if (methodName.equals("<init>") && signature.equals("(Ljava/lang/String;IZ)V")) {
+			checkForEnum = true;
+		}
+		
+		if (checkForEnum) {
+			// trasverse hierarchy and see if we inherit from Enum
+			ClassDescriptor superCD = getXClass().getSuperclassDescriptor();
+			while (superCD != null) {
+				if (superCD.getDottedClassName().equals("java.lang.Enum")) {
+					return true;
+				}
+				
+				try {
+					superCD = Global.getAnalysisCache().getClassAnalysis(XClass.class, superCD).getSuperclassDescriptor();
+				} catch (CheckedAnalysisException e) {
+					break;
+				}
+			}
+		}
+		
+		return false;
+	}
 
-        for (int i = 0; i < argumentTypes.length; ++i) {
-            if (!(argumentTypes[i] instanceof ReferenceType)) {
-                continue;
-            }
+	private void detectUnknownNullnessOfParameter(Method method,
+			TypeQualifierValue<?> nullness) {
+		Type[] argumentTypes = method.getArgumentTypes();
 
-            TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(getXMethod(), i, nullness);
-            if (annotation == null) {
-                TypeQualifierAnnotation defaultAnnotation = findDefaultAnnotation(getXMethod(), nullness);
-                if (defaultAnnotation == null) {
-                    bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_PARAMETER", NORMAL_PRIORITY).addClassAndMethod(this));
-                }
-            }
-        }
-    }
+		for (int i = 0; i < argumentTypes.length; ++i) {
+			if (!(argumentTypes[i] instanceof ReferenceType)) {
+				continue;
+			}
 
-    /**
-     * <p>To avoid a bug of FindBugs, we need reflection (!) to call private method.</p>
-     * @see https://sourceforge.net/p/findbugs/bugs/1194/
-     */
-    private TypeQualifierAnnotation findDefaultAnnotation(XMethod xMethod,
-            TypeQualifierValue<?> nullness) {
-        try {
-            Object result = GET_DEFAULT_ANNOTATION.invoke(null, xMethod, nullness, ElementType.PARAMETER);
-            if (result instanceof TypeQualifierAnnotation) {
-                return (TypeQualifierAnnotation) result;
-            } else {
-                return null;
-            }
-        } catch (SecurityException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
+			TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(getXMethod(), i, nullness);
+			if (annotation == null) {
+				TypeQualifierAnnotation defaultAnnotation = findDefaultAnnotation(getXMethod(), nullness);
+				if (defaultAnnotation == null) {
+					bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_PARAMETER", NORMAL_PRIORITY).addClassAndMethod(this));
+				}
+			}
+		}
+	}
 
-    private void detectUnknowNullnessOfReturnedValue(Method method,
-            TypeQualifierValue<?> nullness) {
-        if (!(method.getReturnType() instanceof ReferenceType)) {
-            return;
-        }
+	/**
+	 * <p>To avoid a bug of FindBugs, we need reflection (!) to call private method.</p>
+	 * @see https://sourceforge.net/p/findbugs/bugs/1194/
+	 */
+	private TypeQualifierAnnotation findDefaultAnnotation(XMethod xMethod,
+			TypeQualifierValue<?> nullness) {
+		try {
+			Object result = GET_DEFAULT_ANNOTATION.invoke(null, xMethod, nullness, ElementType.PARAMETER);
+			if (result instanceof TypeQualifierAnnotation) {
+				return (TypeQualifierAnnotation) result;
+			} else {
+				return null;
+			}
+		} catch (SecurityException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 
-        TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(getXMethod(), nullness);
-        if (annotation == null) {
-            bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_RETURNED_VALUE", NORMAL_PRIORITY).addClassAndMethod(this));
-        }
-    }
+	private void detectUnknowNullnessOfReturnedValue(Method method,
+			TypeQualifierValue<?> nullness) {
+		if (!(method.getReturnType() instanceof ReferenceType)) {
+			return;
+		}
 
-    static {
-        try {
-            GET_DEFAULT_ANNOTATION = TypeQualifierApplications.class
-                    .getDeclaredMethod("getDefaultAnnotation",
-                            AnnotatedObject.class, TypeQualifierValue.class, ElementType.class);
-            GET_DEFAULT_ANNOTATION.setAccessible(true);
-        } catch (SecurityException | NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+		TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(getXMethod(), nullness);
+		if (annotation == null) {
+			bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_RETURNED_VALUE", NORMAL_PRIORITY).addClassAndMethod(this));
+		}
+	}
+
+	static {
+		try {
+			GET_DEFAULT_ANNOTATION = TypeQualifierApplications.class
+					.getDeclaredMethod("getDefaultAnnotation",
+							AnnotatedObject.class, TypeQualifierValue.class, ElementType.class);
+			GET_DEFAULT_ANNOTATION.setAccessible(true);
+		} catch (SecurityException | NoSuchMethodException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 }
