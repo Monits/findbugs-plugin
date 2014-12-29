@@ -3,6 +3,8 @@ package jp.co.worksap.oss.findbugs.jsr305.nullness;
 
 import java.lang.annotation.ElementType;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +15,6 @@ import org.apache.bcel.generic.Type;
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
-import edu.umd.cs.findbugs.ba.Hierarchy2;
 import edu.umd.cs.findbugs.ba.XClass;
 import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.ba.jsr305.JSR305NullnessAnnotations;
@@ -65,7 +66,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		 * This also prevents us from reporting on methods whose expected nullness we don't control,
 		 * such as Object.equals and List.add.
 		 */
-		if (Hierarchy2.findSuperMethods(xMethod).isEmpty()) {
+		if (findSuperMethods(xMethod).isEmpty()) {
 			// Make sure our own annotations are in place
 			detectUnknownNullnessOfParameter(method, NULLNESS_QUALIFIER);
 			detectUnknowNullnessOfReturnedValue(method, NULLNESS_QUALIFIER);
@@ -137,6 +138,51 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 				}
 			}
 		}
+	}
+	
+	/*
+	 * We can't use {@code Hierarchy2.findMatchingMethod} since it considers return types, which is incorrect
+	 * for Java, and just doesn't work with generics. 
+	 */
+	public static Set<XMethod> findSuperMethods(final XMethod m) {
+		final Set<XMethod> result = new HashSet<XMethod>();
+
+		findSuperMethods(m.getClassDescriptor(), m, result);
+		result.remove(m);
+		return result;
+	}
+	
+	private static void findSuperMethods(final ClassDescriptor c, final XMethod m, final Set<XMethod> accumulator) {
+		if (c == null) {
+			return;
+		}
+		
+		try {
+			final XClass xc = Global.getAnalysisCache().getClassAnalysis(XClass.class, c);
+			for (final XMethod xm : xc.getXMethods()) {
+				if (xm.isStatic() == m.isStatic() && xm.getName().equals(m.getName())
+						&& getArgumentSignature(xm).equals(getArgumentSignature(m))) {
+					if (!accumulator.add(xm)) {
+						return;
+					}
+				}
+			}
+			
+			findSuperMethods(xc.getSuperclassDescriptor(), m, accumulator);
+			for (final ClassDescriptor i : xc.getInterfaceDescriptorList()) {
+				findSuperMethods(i, m, accumulator);
+			}
+			if (!accumulator.add(m)) {
+				return;
+			}
+		} catch (final CheckedAnalysisException e) {
+			return;
+		}
+	}
+	
+	private static String getArgumentSignature(final XMethod xm) {
+		final String signature = xm.getSignature();
+		return signature.substring(0, signature.indexOf(')') + 1);
 	}
 
 	/**
