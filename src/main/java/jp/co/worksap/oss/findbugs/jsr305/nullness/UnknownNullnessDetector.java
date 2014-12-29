@@ -3,6 +3,8 @@ package jp.co.worksap.oss.findbugs.jsr305.nullness;
 
 import java.lang.annotation.ElementType;
 import java.lang.reflect.InvocationTargetException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ReferenceType;
@@ -29,6 +31,8 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 	private static final TypeQualifierValue<?> NULLNESS_QUALIFIER
 		= TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
 	
+	private static final Pattern ANONYMOUS_CLASSNAME_PATTERN = Pattern.compile("\\$[0-9]+$");
+	
 	private final BugReporter bugReporter;
 
 	public UnknownNullnessDetector(BugReporter bugReporter) {
@@ -43,6 +47,14 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 			return;
 		}
 		
+		// Ignore constructors for anonymous classes, they can't be declared / overridden
+		if (xMethod.getName().equals("<init>")) {
+			final Matcher matcher = ANONYMOUS_CLASSNAME_PATTERN.matcher(getClassDescriptor().getClassName());
+			if (matcher.find()) {
+				return;
+			}
+		}
+		
 		// Enums have several false positives we need to ignore...
 		if (isEnumIgnoredMethod(xMethod)) {
 			return;
@@ -53,7 +65,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		 * This also prevents us from reporting on methods whose expected nullness we don't control,
 		 * such as Object.equals and List.add.
 		 */
-		if (Hierarchy2.findFirstSuperMethod(xMethod) == null) {
+		if (Hierarchy2.findSuperMethods(xMethod).isEmpty()) {
 			// Make sure our own annotations are in place
 			detectUnknownNullnessOfParameter(method, NULLNESS_QUALIFIER);
 			detectUnknowNullnessOfReturnedValue(method, NULLNESS_QUALIFIER);
@@ -75,24 +87,25 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 			checkForEnum = true;
 		}
 		
-		// super <init>(String, int)
-		if (methodName.equals("<init>") && signature.equals("(Ljava/lang/String;IZ)V")) {
-			checkForEnum = true;
+		if (checkForEnum) {
+			return isCurrentClassAnEnum();
 		}
 		
-		if (checkForEnum) {
-			// trasverse hierarchy and see if we inherit from Enum
-			ClassDescriptor superCD = getXClass().getSuperclassDescriptor();
-			while (superCD != null) {
-				if (superCD.getDottedClassName().equals("java.lang.Enum")) {
-					return true;
-				}
-				
-				try {
-					superCD = Global.getAnalysisCache().getClassAnalysis(XClass.class, superCD).getSuperclassDescriptor();
-				} catch (CheckedAnalysisException e) {
-					break;
-				}
+		return false;
+	}
+
+	private boolean isCurrentClassAnEnum() {
+		// traverse hierarchy and see if we inherit from Enum
+		ClassDescriptor superCD = getXClass().getSuperclassDescriptor();
+		while (superCD != null) {
+			if (superCD.getDottedClassName().equals("java.lang.Enum")) {
+				return true;
+			}
+			
+			try {
+				superCD = Global.getAnalysisCache().getClassAnalysis(XClass.class, superCD).getSuperclassDescriptor();
+			} catch (CheckedAnalysisException e) {
+				break;
 			}
 		}
 		
@@ -102,8 +115,16 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 	private void detectUnknownNullnessOfParameter(Method method,
 			TypeQualifierValue<?> nullness) {
 		Type[] argumentTypes = method.getArgumentTypes();
+		int initialIndex = 0;
 
-		for (int i = 0; i < argumentTypes.length; ++i) {
+		if (method.getName().equals("<init>") && method.getSignature().startsWith("(Ljava/lang/String;I")) {
+			// This may be an enum, in which case the first arg is inherited and can't be checked
+			if (isCurrentClassAnEnum()) {
+				initialIndex = 2;
+			}
+		}
+		
+		for (int i = initialIndex; i < argumentTypes.length; ++i) {
 			if (!(argumentTypes[i] instanceof ReferenceType)) {
 				continue;
 			}
