@@ -132,7 +132,9 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 		
 		for (int i = initialIndex; i < argumentTypes.length; ++i) {
-			if (!(argumentTypes[i] instanceof ReferenceType)) {
+			if (!(argumentTypes[i] instanceof ReferenceType)
+					|| getXMethod().isVariableSynthetic(i)
+					|| (i == argumentTypes.length - 1 && getXMethod().isVarArgs())) {
 				continue;
 			}
 
