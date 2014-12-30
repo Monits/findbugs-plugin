@@ -84,7 +84,8 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 		
 		// public static CCC valueOf(String)
-		if (methodName.equals("valueOf") && xMethod.isStatic() && signature.equals("(Ljava/lang/String;)L" + xMethod.getClassDescriptor().getClassName() + ";")) {
+		if (methodName.equals("valueOf") && xMethod.isStatic()
+				&& signature.equals("(Ljava/lang/String;)L" + xMethod.getClassDescriptor().getClassName() + ";")) {
 			checkForEnum = true;
 		}
 		
@@ -118,10 +119,15 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		Type[] argumentTypes = method.getArgumentTypes();
 		int initialIndex = 0;
 
-		if (method.getName().equals("<init>") && method.getSignature().startsWith("(Ljava/lang/String;I")) {
-			// This may be an enum, in which case the first arg is inherited and can't be checked
-			if (isCurrentClassAnEnum()) {
-				initialIndex = 2;
+		if (method.getName().equals("<init>")) {
+			if (method.getSignature().startsWith("(Ljava/lang/String;I")) {
+				// This may be an enum, in which case the first arg is inherited and can't be checked
+				if (isCurrentClassAnEnum()) {
+					initialIndex = 2;
+				}
+			} else if (!getXClass().isStatic() && method.getSignature()
+					.startsWith("(L" + getXClass().getContainingScope().getClassDescriptor().getClassName() + ";")) {
+				initialIndex = 1;
 			}
 		}
 		
@@ -130,11 +136,13 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 				continue;
 			}
 
-			TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(getXMethod(), i, nullness);
+			TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(
+					getXMethod(), i, nullness);
 			if (annotation == null) {
 				TypeQualifierAnnotation defaultAnnotation = findDefaultAnnotation(getXMethod(), nullness);
 				if (defaultAnnotation == null) {
-					bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_PARAMETER", NORMAL_PRIORITY).addClassAndMethod(this));
+					bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_PARAMETER", NORMAL_PRIORITY)
+						.addClassAndMethod(this));
 				}
 			}
 		}
@@ -211,9 +219,11 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 			return;
 		}
 
-		TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(getXMethod(), nullness);
+		TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(
+				getXMethod(), nullness);
 		if (annotation == null) {
-			bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_RETURNED_VALUE", NORMAL_PRIORITY).addClassAndMethod(this));
+			bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_RETURNED_VALUE", NORMAL_PRIORITY)
+				.addClassAndMethod(this));
 		}
 	}
 
