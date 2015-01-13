@@ -69,6 +69,77 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+	
+	@Test
+	public void testAnnotatedArgumentsEnum() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/AnnotatedArgumentsEnum")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
+	
+	@Test
+	public void testUnannotatedVarargs() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedVarargs")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
+	
+
+	@Test
+	public void testAnnotatedInnerClassArguments() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/AnnotatedInnerClassArguments")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
+	
+	@Test
+	public void testUnannotatedInnerClassArguments() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedInnerClassArguments$Inner"),
+			getClassFilePath("samples/jsr305/nullness/UnannotatedInnerClassArguments")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.inClass("UnannotatedInnerClassArguments$Inner")
+				.build()
+		);
+	}
 
 	@Test
 	public void testAnnotatedMethod() throws Exception {
