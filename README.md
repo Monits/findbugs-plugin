@@ -44,12 +44,12 @@ and make sure to reference our public repositories
 
 # history
 
-## 0.1.0
+## 0.1.0-SNAPSHOT
 - forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin). Awesome plugin, but Findbugs 2 only.
 - upgraded to Findbugs 3
 - rewrote most error messages to be more specific
 - fixed method detection for UnknownNullnessDetector
-- rewrote UnexpectedAccessDetector unit tests
+- rewrote all unit tests, and added several new ones. Great code coverage
 - made UnexpectedAccessDetector ignore calls from methods marked as `@Test`
 
 ## 0.0.3
