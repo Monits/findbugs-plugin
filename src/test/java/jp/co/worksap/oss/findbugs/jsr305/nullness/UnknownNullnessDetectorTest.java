@@ -140,6 +140,24 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+	
+	@Test
+	public void testAnonymousClassConstructor() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/AnonymousClassConstructor$1"),
+			getClassFilePath("samples/jsr305/nullness/AnonymousClassConstructor")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
 
 	@Test
 	public void testAnnotatedMethod() throws Exception {
