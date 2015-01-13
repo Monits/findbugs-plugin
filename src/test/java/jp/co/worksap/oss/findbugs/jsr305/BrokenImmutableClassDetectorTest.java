@@ -1,41 +1,91 @@
 package jp.co.worksap.oss.findbugs.jsr305;
 
+
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.BugReporter;
+import com.h3xstream.findbugs.test.BaseDetectorTest;
+import com.h3xstream.findbugs.test.EasyBugReporter;
 
-@Ignore("test-driven-detectors4findbugs dependency is removed")
-public class BrokenImmutableClassDetectorTest {
-
-	private BrokenImmutableClassDetector detector;
-	private BugReporter bugReporter;
-
+public class BrokenImmutableClassDetectorTest extends BaseDetectorTest {
+	private EasyBugReporter reporter;
+	
 	@Before
 	public void setup() {
-		//        bugReporter = bugReporterForTesting();
-		//        detector = new BrokenImmutableClassDetector(bugReporter);
+		reporter = spy(new EasyBugReporter());
 	}
 
 	@Test
-	public void testObjectIsImmutable() throws Exception {
-		//        assertNoBugsReported(Object.class, detector, bugReporter);
+	public void testGoodMutableClass() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/GoodMutableClass")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("IMMUTABLE_CLASS_SHOULD_BE_FINAL")
+				.build()
+		);
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("BROKEN_IMMUTABILITY")
+				.build()
+		);
 	}
 
 	@Test
 	public void testEnumIsImmutable() throws Exception {
-		//        assertNoBugsReported(When.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/ImmutableEnum")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("IMMUTABLE_CLASS_SHOULD_BE_FINAL")
+				.build()
+		);
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("BROKEN_IMMUTABILITY")
+				.build()
+		);
 	}
 
 	@Test
-	public void testMutableClass() throws Exception {
-		//        assertBugReported(MutableClass.class, detector, bugReporter, ofType("IMMUTABLE_CLASS_SHOULD_BE_FINAL"));
-		//        assertBugReported(MutableClass.class, detector, bugReporter, ofType("BROKEN_IMMUTABILITY"));
-	}
+	public void testBadMutableClass() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/BadImmutableClass"),
+			getClassFilePath("samples/jsr305/ExtendsMutableClass")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
 
-	@Test
-	public void testClassExtendsMutableClass() throws Exception {
-		//        assertBugReported(ExtendsMutableClass.class, detector, bugReporter, ofType("BROKEN_IMMUTABILITY"));
+		verify(reporter, times(2)).doReportBug(
+			bugDefinition()
+				.bugType("BROKEN_IMMUTABILITY")
+				.inClass("BadImmutableClass")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("IMMUTABLE_CLASS_SHOULD_BE_FINAL")
+				.inClass("BadImmutableClass")
+				.build()
+		);
 	}
 }

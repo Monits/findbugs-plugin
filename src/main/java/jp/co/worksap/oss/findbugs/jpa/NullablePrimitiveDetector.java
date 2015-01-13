@@ -29,12 +29,15 @@ public class NullablePrimitiveDetector extends AbstractColumnDetector {
     }
 
     private void reportNullablePrimitive(Type columnType) {
-        BugInstance bug = new BugInstance(this, "NULLABLE_PRIMITIVE", NORMAL_PRIORITY);
+        BugInstance bug = new BugInstance(this, "NULLABLE_PRIMITIVE", NORMAL_PRIORITY)
+        	.addClass(this);
         if (visitingMethod()) {
             bug.addMethod(this);
+        } else if (visitingField()) {
+        	bug.addField(this);
         }
-        getBugReporter().reportBug(bug);
         
+        getBugReporter().reportBug(bug);
     }
 
     private boolean detectNullability(Map<String, ElementValue> elements) {

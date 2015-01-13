@@ -39,7 +39,7 @@ public class UndocumentedSuppressFBWarningsDetector extends BytecodeScanningDete
     @Override
     public void visitAnnotation(@DottedClassName String annotationClass,
             Map<String, ElementValue> map, boolean runtimeVisible) {
-        if (! TARGET_ANNOTATIONS.contains(annotationClass)) {
+        if (!TARGET_ANNOTATIONS.contains(annotationClass)) {
             return;
         }
 

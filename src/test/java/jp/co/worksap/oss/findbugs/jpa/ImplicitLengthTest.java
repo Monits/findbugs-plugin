@@ -1,50 +1,123 @@
 package jp.co.worksap.oss.findbugs.jpa;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.BugReporter;
+import com.h3xstream.findbugs.test.BaseDetectorTest;
+import com.h3xstream.findbugs.test.EasyBugReporter;
 
-@Ignore("test-driven-detectors4findbugs dependency is removed")
-public class ImplicitLengthTest {
-	private BugReporter bugReporter;
-	private ImplicitLengthDetector detector;
-
+public class ImplicitLengthTest extends BaseDetectorTest {
+	private EasyBugReporter reporter;
+	
 	@Before
-	public void before() {
-		//        this.bugReporter = bugReporterForTesting();
-		//        this.detector = new ImplicitLengthDetector(bugReporter);
+	public void setup() {
+		reporter = spy(new EasyBugReporter());
 	}
 
 	@Test
 	public void testNegativeLength() throws Exception {
-		//        assertBugReported(ColumnWithNegativeLength.class, detector,
-		//                bugReporter, ofType("ILLEGAL_LENGTH"));
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ColumnWithNegativeLength")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("ILLEGAL_LENGTH")
+				.inClass("ColumnWithNegativeLength")
+				.build()
+		);
 	}
 
 	@Test
 	public void testTooLongLength() throws Exception {
-		//        assertBugReported(ColumnWithTooLongLength.class, detector,
-		//                bugReporter, ofType("ILLEGAL_LENGTH"));
-		//        assertBugReported(GetterWithTooLongLength.class, detector,
-		//                bugReporter, ofType("ILLEGAL_LENGTH"));
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ColumnWithTooLongLength"),
+			getClassFilePath("samples/jpa/GetterWithTooLongLength")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("ILLEGAL_LENGTH")
+				.inClass("ColumnWithTooLongLength")
+				.build()
+		);
+		verify(reporter).doReportBug(
+		bugDefinition()
+			.bugType("ILLEGAL_LENGTH")
+			.inClass("GetterWithTooLongLength")
+			.build()
+		);
 	}
 
 	@Test
 	public void testLongLengthWithLob() throws Exception {
-		//		assertNoBugsReported(ColumnWithLongLengthAndLob.class, detector, bugReporter);
-		//		assertNoBugsReported(GetterWithLongLengthAndLob.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ColumnWithLongLengthAndLob"),
+			getClassFilePath("samples/jpa/GetterWithLongLengthAndLob")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("LONG_COLUMN_NAME")
+				.build()
+		);
 	}
 
 	@Test
 	public void testExplicitLength() throws Exception {
-		//		assertNoBugsReported(ColumnWithLength.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ColumnWithLength")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("LONG_COLUMN_NAME")
+				.build()
+		);
 	}
 
 	@Test
 	public void testImplicitLength() throws Exception {
-		//		assertBugReported(ColumnWithoutElement.class, detector, bugReporter, ofType("IMPLICIT_LENGTH"));
-		//		assertBugReported(GetterWithoutElement.class, detector, bugReporter, ofType("IMPLICIT_LENGTH"));
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ColumnWithoutElement"),
+			getClassFilePath("samples/jpa/GetterWithoutElement")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("IMPLICIT_LENGTH")
+				.inClass("ColumnWithoutElement")
+				.build()
+		);
+		verify(reporter).doReportBug(
+		bugDefinition()
+			.bugType("IMPLICIT_LENGTH")
+			.inClass("GetterWithoutElement")
+			.build()
+		);
 	}
 }

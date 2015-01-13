@@ -1,56 +1,140 @@
 package jp.co.worksap.oss.findbugs.jpa;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.BugReporter;
+import com.h3xstream.findbugs.test.BaseDetectorTest;
+import com.h3xstream.findbugs.test.EasyBugReporter;
 
-@Ignore("test-driven-detectors4findbugs dependency is removed")
-public class NullablePrimitiveDetectorTest {
-	private BugReporter bugReporter;
-	private NullablePrimitiveDetector detector;
-
+public class NullablePrimitiveDetectorTest extends BaseDetectorTest {
+	private EasyBugReporter reporter;
+	
 	@Before
-	public void before() {
-		//        this.bugReporter = bugReporterForTesting();
-		//        this.detector = new NullablePrimitiveDetector(bugReporter);
+	public void setup() {
+		reporter = spy(new EasyBugReporter());
 	}
 
 	@Test
 	public void testNullableObject() throws Exception {
-		//        assertNoBugsReported(UseColumnDefinition.class, detector, bugReporter);
-		//        assertNoBugsReported(ColumnWithoutElement.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/UseColumnDefinition"),
+			getClassFilePath("samples/jpa/ColumnWithoutElement")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.build()
+		);
 	}
 
 	@Test
 	public void testNullablePrimitive() throws Exception {
-		//        assertBugReported(NullableBooleanColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableByteColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableShortColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableIntColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableLongColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableFloatColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableDoubleColumn.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
-		//        assertBugReported(NullableBooleanGetter.class, detector,
-		//                bugReporter, ofType("NULLABLE_PRIMITIVE"));
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/NullableBooleanColumn"),
+			getClassFilePath("samples/jpa/NullableByteColumn"),
+			getClassFilePath("samples/jpa/NullableShortColumn"),
+			getClassFilePath("samples/jpa/NullableIntColumn"),
+			getClassFilePath("samples/jpa/NullableLongColumn"),
+			getClassFilePath("samples/jpa/NullableFloatColumn"),
+			getClassFilePath("samples/jpa/NullableDoubleColumn"),
+			getClassFilePath("samples/jpa/NullableBooleanGetter")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableBooleanColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableByteColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableShortColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableIntColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableLongColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableFloatColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableDoubleColumn")
+				.build()
+		);
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.inClass("NullableBooleanGetter")
+				.build()
+		);
 	}
 
 	@Test
 	public void testNonNullableObject() throws Exception {
-		//		assertNoBugsReported(ColumnWithNullable.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ColumnWithNullable")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.build()
+		);
 	}
 
 	@Test
 	public void testNonNullableInt() throws Exception {
-		//		assertNoBugsReported(NonNullablePrimitiveColumn.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/NonNullablePrimitiveColumn")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("NULLABLE_PRIMITIVE")
+				.build()
+		);
 	}
 
 }

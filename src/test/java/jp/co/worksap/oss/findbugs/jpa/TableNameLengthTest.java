@@ -1,49 +1,90 @@
 package jp.co.worksap.oss.findbugs.jpa;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.BugReporter;
+import com.h3xstream.findbugs.test.BaseDetectorTest;
+import com.h3xstream.findbugs.test.EasyBugReporter;
 
-@Ignore("test-driven-detectors4findbugs dependency is removed")
-public class TableNameLengthTest {
-	private BugReporter bugReporter;
-	private LongTableNameDetector detector;
-
+public class TableNameLengthTest extends BaseDetectorTest {
+	private EasyBugReporter reporter;
+	
 	@Before
 	public void setup() {
-		//        bugReporter = bugReporterForTesting();
-		//        detector = new LongTableNameDetector(bugReporter);
+		reporter = spy(new EasyBugReporter());
 	}
 
 	@Test
 	public void testShortName() throws Exception {
-		//        assertNoBugsReported(ShortTableName.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ShortTableName")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("LONG_TABLE_NAME")
+				.build()
+		);
 	}
 
 	@Test
 	public void testShortNameWithoutAnnotationParameter() throws Exception {
-		//        assertNoBugsReported(ShortTableNameNoAnnotationPara.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ShortTableNameNoAnnotationPara")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("LONG_TABLE_NAME")
+				.build()
+		);
 	}
 
 	@Test
 	public void testLongName() throws Exception {
-		//        assertBugReported(LongTableName.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/LongTableName")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("LONG_TABLE_NAME")
+				.inClass("LongTableName")
+				.build()
+		);
 	}
 
 	@Test
 	public void testLongNameWithoutAnnotationParameter() throws Exception {
-		//        assertBugReported(LongTableNameWithoutAnnotationParameter.class, detector, bugReporter);
-	}
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/LongTableNameWithoutAnnotationParameter")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
 
-	@Test
-	public void testTrimPackage() {
-		assertThat(detector.trimPackage("ClassName"), is(equalTo("ClassName")));
-		assertThat(detector.trimPackage("jp/co/worksap/ClassName"), is(equalTo("ClassName")));
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("LONG_TABLE_NAME")
+				.inClass("LongTableNameWithoutAnnotationParameter")
+				.build()
+		);
 	}
 }

@@ -1,49 +1,126 @@
 package jp.co.worksap.oss.findbugs.junit;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.BugReporter;
+import com.h3xstream.findbugs.test.BaseDetectorTest;
+import com.h3xstream.findbugs.test.EasyBugReporter;
 
-@Ignore("test-driven-detectors4findbugs dependency is removed")
-public class UndocumentedIgnoreDetectorTest {
-	private UndocumentedIgnoreDetector detector;
-	private BugReporter bugReporter;
+public class UndocumentedIgnoreDetectorTest extends BaseDetectorTest {
+	private EasyBugReporter reporter;
 
 	@Before
 	public void setup() {
-		//		bugReporter = bugReporterForTesting();
-		//		detector = new UndocumentedIgnoreDetector(bugReporter);
+		reporter = spy(new EasyBugReporter());
 	}
 
 	@Test
 	public void testIgnoreClassWithExplanation() throws Exception {
-		//		assertNoBugsReported(IgnoreClassWithExplanation.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/junit/IgnoreClassWithExplanation")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNDOCUMENTED_IGNORE")
+				.build()
+		);
 	}
 
 	@Test
 	public void testIgnoreMethodWithExplanation() throws Exception {
-		//		assertNoBugsReported(IgnoreMethodWithExplanation.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/junit/IgnoreMethodWithExplanation")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNDOCUMENTED_IGNORE")
+				.build()
+		);
 	}
 
 	@Test
 	public void testIgnoreClassWithEmptyExplanation() throws Exception {
-		//		assertBugReported(IgnoreClassWithEmptyExplanation.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/junit/IgnoreClassWithEmptyExplanation")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNDOCUMENTED_IGNORE")
+				.inClass("IgnoreClassWithEmptyExplanation")
+				.build()
+		);
 	}
 
 	@Test
 	public void testIgnoreMethodWithEmptyExplanation() throws Exception {
-		//		assertBugReported(IgnoreMethodWithEmptyExplanation.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/junit/IgnoreMethodWithEmptyExplanation")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNDOCUMENTED_IGNORE")
+				.inClass("IgnoreMethodWithEmptyExplanation")
+				.build()
+		);
 	}
 
 	@Test
 	public void testIgnoreClassWithoutExplanation() throws Exception {
-		//		assertBugReported(IgnoreClassWithoutExplanation.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/junit/IgnoreClassWithoutExplanation")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNDOCUMENTED_IGNORE")
+				.inClass("IgnoreClassWithoutExplanation")
+				.build()
+		);
 	}
 
 	@Test
 	public void testIgnoreMethodWithoutExplanation() throws Exception {
-		//		assertBugReported(IgnoreMethodWithoutExplanation.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/junit/IgnoreMethodWithoutExplanation")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNDOCUMENTED_IGNORE")
+				.inClass("IgnoreMethodWithoutExplanation")
+				.build()
+		);
 	}
 }

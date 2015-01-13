@@ -1,30 +1,56 @@
 package jp.co.worksap.oss.findbugs.jpa;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.BugReporter;
+import com.h3xstream.findbugs.test.BaseDetectorTest;
+import com.h3xstream.findbugs.test.EasyBugReporter;
 
-@Ignore("test-driven-detectors4findbugs dependency is removed")
-public class ColumnDefinitionTest {
+public class ColumnDefinitionTest extends BaseDetectorTest {
 
-	private BugReporter bugReporter;
-	private ColumnDefinitionDetector detector;
+	private EasyBugReporter reporter;
 
 	@Before
 	public void setup() {
-		//		bugReporter = bugReporterForTesting();
-		//		detector = new ColumnDefinitionDetector(bugReporter);
+		reporter = spy(new EasyBugReporter());
 	}
 
 	@Test
 	public void testNormalClass() throws Exception {
-		//		assertNoBugsReported(ShortColumnName.class, detector, bugReporter);
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/ShortColumnName")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("USE_COLUMN_DEFINITION")
+				.build()
+		);
 	}
 
 	@Test
 	public void testWithColumnDefinition() throws Exception {
-		//		assertBugReported(UseColumnDefinition.class, detector, bugReporter, ofType("USE_COLUMN_DEFINITION"));
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jpa/UseColumnDefinition")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("USE_COLUMN_DEFINITION")
+				.inClass("UseColumnDefinition")
+				.build()
+		);
 	}
 }

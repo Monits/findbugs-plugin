@@ -4,8 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
@@ -64,8 +62,7 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 	/**
 	 * <p>Report if specified method is package-private and annotated by {@code @VisibleForTesting}.</p>
 	 */
-	@VisibleForTesting
-	void verifyVisibility(ClassDescriptor invokedClass, XMethod invokedMethod, boolean reportCaller) throws ClassNotFoundException {
+	private void verifyVisibility(ClassDescriptor invokedClass, XMethod invokedMethod, boolean reportCaller) throws ClassNotFoundException {
 		if (checkVisibility(invokedMethod) && checkAnnotated(invokedMethod)) {
 			BugInstance bug = new BugInstance(this, "GUAVA_UNEXPECTED_ACCESS_TO_VISIBLE_FOR_TESTING", HIGH_PRIORITY);
 			if (reportCaller) {
@@ -78,16 +75,14 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 	/**
 	 * @return true if visibility of specified method is package-private.
 	 */
-	@VisibleForTesting
-	boolean checkVisibility(XMethod bcelMethod) {
+	private boolean checkVisibility(XMethod bcelMethod) {
 		return !(bcelMethod.isPrivate() || bcelMethod.isProtected() || bcelMethod.isPublic());
 	}
 
 	/**
 	 * @return true if specified method is annotated by {@code VisibleForTesting}.
 	 */
-	@VisibleForTesting
-	boolean checkAnnotated(XMethod bcelMethod) {
+	private boolean checkAnnotated(XMethod bcelMethod) {
 		for (AnnotationValue annotation : bcelMethod.getAnnotations()) {
 			String type = annotation.getAnnotationClass().getSignature();
 			if ("Lcom/google/common/annotations/VisibleForTesting;".equals(type)) {
@@ -97,8 +92,7 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 		return false;
 	}
 
-	@VisibleForTesting
-	boolean isInvoking(int opcode) {
+	private boolean isInvoking(int opcode) {
 		return opcode == INVOKESPECIAL || opcode == INVOKEINTERFACE || opcode == INVOKESTATIC || opcode == INVOKEVIRTUAL;
 	}
 
