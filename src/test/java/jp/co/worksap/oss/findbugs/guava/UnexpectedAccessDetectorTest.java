@@ -5,7 +5,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.h3xstream.findbugs.test.BaseDetectorTest;
@@ -25,7 +24,6 @@ public class UnexpectedAccessDetectorTest extends BaseDetectorTest {
 	}
 
 	@Test
-	@Ignore
 	public void testNormalMethod() throws Exception {
 		// Locate test code
 		final String[] files = {
@@ -44,7 +42,6 @@ public class UnexpectedAccessDetectorTest extends BaseDetectorTest {
 	}
 
 	@Test
-	@Ignore
 	public void testCallingAnnotatedMethod() throws Exception {
 		// Locate test code
 		final String[] files = {
