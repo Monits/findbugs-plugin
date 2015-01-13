@@ -97,18 +97,10 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 	}
 
 	private boolean isCurrentClassAnEnum() {
-		// traverse hierarchy and see if we inherit from Enum
-		ClassDescriptor superCD = getXClass().getSuperclassDescriptor();
-		while (superCD != null) {
-			if (superCD.getDottedClassName().equals("java.lang.Enum")) {
-				return true;
-			}
-			
-			try {
-				superCD = Global.getAnalysisCache().getClassAnalysis(XClass.class, superCD).getSuperclassDescriptor();
-			} catch (CheckedAnalysisException e) {
-				break;
-			}
+		// enums can't be put into hierarchies, they must extend java.lang.Enum directly
+		final ClassDescriptor superCD = getXClass().getSuperclassDescriptor();
+		if (superCD.getDottedClassName().equals("java.lang.Enum")) {
+			return true;
 		}
 		
 		return false;
