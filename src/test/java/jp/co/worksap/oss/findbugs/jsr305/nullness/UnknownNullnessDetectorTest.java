@@ -245,4 +245,39 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+	
+	@Test
+	public void testReportsOnEnumLookAlike() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedEnumLookAlike")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_RETURNED_VALUE")
+				.inClass("UnannotatedEnumLookAlike")
+				.inMethod("values")
+				.build()
+		);
+		
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_RETURNED_VALUE")
+				.inClass("UnannotatedEnumLookAlike")
+				.inMethod("valueOf")
+				.build()
+		);
+		
+		verify(reporter).doReportBug(
+				bugDefinition()
+					.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+					.inClass("UnannotatedEnumLookAlike")
+					.inMethod("valueOf")
+					.build()
+			);
+	}
 }
