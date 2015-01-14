@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
+import edu.umd.cs.findbugs.ba.Hierarchy;
 import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
@@ -33,29 +34,35 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 	}
 
 	@Override
-	public void sawOpcode(int opcode) {
+	public void sawOpcode(final int opcode) {
 		if (!isInvoking(opcode)) {
 			return;
 		}
 
-		ClassDescriptor currentClass = getClassDescriptor();
-		ClassDescriptor invokedClass = getClassDescriptorOperand();
+		final ClassDescriptor currentClass = getClassDescriptor();
+		final ClassDescriptor invokedClass = getClassDescriptorOperand();
 		
-		if (currentClass.equals(invokedClass)) {
-			// no need to check, because method is called by owner
-		} else if (!currentClass.getPackageName().equals(invokedClass.getPackageName())) {
-			// no need to check, because method is called by class in other package
-		} else if (getXMethod().getAnnotation(junitTestClassDescriptor) != null) {
-			// no need to check, because method is called by @Test method
-		} else {
-			XMethod invokedMethod = getXMethodOperand();
-
-			try {
-				verifyVisibility(invokedClass, invokedMethod, true);
-			} catch (ClassNotFoundException e) {
-				String message = String.format("Detector could not find %s, you should add this class into CLASSPATH", invokedClass.getDottedClassName());
-				bugReporter.logError(message, e);
+		try {
+			if (currentClass.equals(invokedClass)) {
+				// no need to check, because method is called by owner
+			} else if (!currentClass.getPackageName().equals(invokedClass.getPackageName())) {
+				// no need to check, because method is called by class in other package
+			} else if (getXMethod().getAnnotation(junitTestClassDescriptor) != null) {
+				// no need to check, because method is called by JUnit's 4 @Test method
+			} else if (Hierarchy.isSubtype(currentClass.getClassName(), "junit.framework.TestCase")) {
+				// no need to check, because method is called by JUnit's 3 TestCase method
+			} else {
+				final XMethod invokedMethod = getXMethodOperand();
+	
+				try {
+					verifyVisibility(invokedClass, invokedMethod, true);
+				} catch (ClassNotFoundException e) {
+					String message = String.format("Detector could not find %s, you should add this class into CLASSPATH", invokedClass.getDottedClassName());
+					bugReporter.logError(message, e);
+				}
 			}
+		} catch (final ClassNotFoundException e) {
+			// Ignored
 		}
 	}
 

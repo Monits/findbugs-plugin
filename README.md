@@ -50,7 +50,7 @@ and make sure to reference our public repositories
 - rewrote most error messages to be more specific
 - fixed method detection for UnknownNullnessDetector
 - rewrote all unit tests, and added several new ones. Great code coverage
-- made UnexpectedAccessDetector ignore calls from methods marked as `@Test`
+- made UnexpectedAccessDetector ignore calls from methods marked as `@Test` or from a class that extends `junit.framework.TestCase`
 
 ## 0.0.3
 

@@ -5,18 +5,19 @@ package samples.guava;
 
 import jp.co.worksap.oss.findbugs.guava.UnexpectedAccessDetector;
 
-import com.google.common.annotations.VisibleForTesting;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Class used only for {@link UnexpectedAccessDetector}-tests
  * @author tolina GmbH
  *
  */
-public class TestClass {
+@Ignore("Not a real test, but used as test sample")
+public class JUnit4Test {
 
-	@VisibleForTesting
+	@Test
 	void test() {
-		return;
+		new MethodWithVisibleForTesting().method();
 	}
-
 }

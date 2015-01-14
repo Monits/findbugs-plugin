@@ -40,6 +40,42 @@ public class UnexpectedAccessDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+	
+	@Test
+	public void testCallFromJUnit4Test() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/guava/JUnit4Test"),
+			getClassFilePath("samples/guava/MethodWithVisibleForTesting")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("GUAVA_UNEXPECTED_ACCESS_TO_VISIBLE_FOR_TESTING")
+				.build()
+		);
+	}
+	
+	@Test
+	public void testCallFromJUnit3Test() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/guava/JUnit3Test"),
+			getClassFilePath("samples/guava/MethodWithVisibleForTesting")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("GUAVA_UNEXPECTED_ACCESS_TO_VISIBLE_FOR_TESTING")
+				.build()
+		);
+	}
 
 	@Test
 	public void testCallingAnnotatedMethod() throws Exception {
