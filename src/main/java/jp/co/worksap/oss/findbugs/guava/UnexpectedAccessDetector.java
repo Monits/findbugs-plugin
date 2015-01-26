@@ -54,11 +54,12 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 			} else {
 				final XMethod invokedMethod = getXMethodOperand();
 	
-				try {
+				if (invokedMethod != null) {
 					verifyVisibility(invokedClass, invokedMethod, true);
-				} catch (ClassNotFoundException e) {
-					String message = String.format("Detector could not find %s, you should add this class into CLASSPATH", invokedClass.getDottedClassName());
-					bugReporter.logError(message, e);
+				} else {
+					final String message = String.format("Detector could not find target method of class %s, when analyzing method %s of class %s",
+							invokedClass.getDottedClassName(), getXMethod().getName(), currentClass.getDottedClassName());
+					bugReporter.logError(message);
 				}
 			}
 		} catch (final ClassNotFoundException e) {
@@ -69,7 +70,7 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 	/**
 	 * <p>Report if specified method is package-private and annotated by {@code @VisibleForTesting}.</p>
 	 */
-	private void verifyVisibility(ClassDescriptor invokedClass, XMethod invokedMethod, boolean reportCaller) throws ClassNotFoundException {
+	private void verifyVisibility(ClassDescriptor invokedClass, XMethod invokedMethod, boolean reportCaller) {
 		if (checkVisibility(invokedMethod) && checkAnnotated(invokedMethod)) {
 			BugInstance bug = new BugInstance(this, "GUAVA_UNEXPECTED_ACCESS_TO_VISIBLE_FOR_TESTING", HIGH_PRIORITY);
 			if (reportCaller) {
