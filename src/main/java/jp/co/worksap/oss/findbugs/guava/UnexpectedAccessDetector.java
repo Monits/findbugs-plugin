@@ -56,14 +56,10 @@ public class UnexpectedAccessDetector extends BytecodeScanningDetector {
 	
 				if (invokedMethod != null) {
 					verifyVisibility(invokedClass, invokedMethod, true);
-				} else {
-					final String message = String.format("Detector could not find target method of class %s, when analyzing method %s of class %s",
-							invokedClass.getDottedClassName(), getXMethod().getName(), currentClass.getDottedClassName());
-					bugReporter.logError(message);
 				}
 			}
 		} catch (final ClassNotFoundException e) {
-			// Ignored
+			bugReporter.reportMissingClass(e);
 		}
 	}
 
