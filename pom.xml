@@ -8,7 +8,7 @@
 		<version>2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>findbugs-plugin</artifactId>
-	<version>0.1.0-RC1</version>
+	<version>0.1.0</version>
 	<url>https://github.com/Monits/findbugs-plugin</url>
 	<description>Monits Findbugs plugin set</description>
 	<scm>
