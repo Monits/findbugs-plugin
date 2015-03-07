@@ -1,0 +1,6 @@
+<FindBugsFilter>
+    <!-- Don't analyze samples, there are bugs there on purpose -->
+    <Match>
+        <Package name="~samples\..*" />
+    </Match>
+</FindBugsFilter>
