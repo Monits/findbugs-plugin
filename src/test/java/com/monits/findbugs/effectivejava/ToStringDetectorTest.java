@@ -114,6 +114,30 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 	}
 
 	@Test
+	public void testGoodMissingArrayClasses() throws Exception {
+		// Locate test code
+		final String[] files = {
+			// needed in the analysis, for GoodMissingArrayToStringClass
+			getClassFilePath("samples/effectivejava/item10/EnumWithState"),
+			getClassFilePath("samples/effectivejava/item10/GoodMissingArrayToStringClass"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.build()
+		);
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
+	
+	@Test
 	public void testStaticFieldNotReported() throws Exception {
 		// Locate test code
 		final String[] files = {
@@ -204,6 +228,46 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
 				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
+	
+	@Test
+	public void testMissingArrayClasses() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/effectivejava/item10/ArrayMissingToStringClass"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.inClass("ArrayMissingToStringClass")
+				.atField("rawData")
+				.build()
+		);
+	}
+	
+	@Test
+	public void testMissingEnumClasses() throws Exception {
+		// Locate test code
+		final String[] files = {
+			// needed in the analysis, for BadEnumCompositeClass
+			getClassFilePath("samples/effectivejava/item10/EnumWithState"),
+			getClassFilePath("samples/effectivejava/item10/BadEnumCompositeClass"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.inClass("BadEnumCompositeClass")
+				.atField("data")
 				.build()
 		);
 	}

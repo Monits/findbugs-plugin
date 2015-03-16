@@ -114,7 +114,10 @@ public class ToStringDetector extends BytecodeScanningDetector {
 					final String signature = f.getSignature();
 					final ClassDescriptor fieldClassDescriptor
 						= DescriptorFactory.createClassDescriptorFromFieldSignature(signature);
-					if (fieldClassDescriptor != null) {
+					if (fieldClassDescriptor == null) {
+						// This is an array of primitives, interesting by default
+						toStringFields.put(f.getName(), f);
+					} else {
 						final XClass fieldXClass = Global.getAnalysisCache().getClassAnalysis(
 								XClass.class, fieldClassDescriptor);
 						if (fieldXClass != null && isStatefullClass(fieldXClass)) {
