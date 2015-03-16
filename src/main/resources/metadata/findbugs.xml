@@ -74,4 +74,11 @@
   <BugPattern type="FINDBUGS_UNDOCUMENTED_SUPPRESS_WARNINGS" abbrev="FINDBUGS"
     category="BAD_PRACTICE" />
 
+  <Detector class="com.monits.findbugs.effectivejava.ToStringDetector"
+    speed="fast" hidden="false" reports="MISSING_FIELD_IN_TO_STRING" />
+  <BugPattern type="MISSING_FIELD_IN_TO_STRING" abbrev="EFFECTIVE"
+    category="BAD_PRACTICE" />
+  <BugPattern type="MISSING_TO_STRING_OVERRIDE" abbrev="EFFECTIVE"
+    category="BAD_PRACTICE" />
+  
 </FindbugsPlugin>

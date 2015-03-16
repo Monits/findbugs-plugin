@@ -305,6 +305,42 @@
   ]]>
     </Details>
   </BugPattern>
+  
+  <Detector class="com.monits.findbugs.effectivejava.ToStringDetector">
+    <Details>
+      This detector will look for classes missing proper toString overrides, or missing fields in toString.
+    </Details>
+  </Detector>
+
+  <BugPattern type="MISSING_FIELD_IN_TO_STRING">
+    <ShortDescription>All non-static and meaningfull fields should be included in toString.
+    </ShortDescription>
+    <LongDescription>
+      The field {1.name} is not included in the current toString implementation.
+      Having a meaningful and complete toString will help developers debug code, by providing more meaningful
+      inspections out of the box. For more information, refer to Effective Java, item 10.
+    </LongDescription>
+    <Details>
+  <![CDATA[
+    <p>All non-static and meaningfull fields should be included in toString.</p>
+  ]]>
+    </Details>
+  </BugPattern>
+  
+  <BugPattern type="MISSING_TO_STRING_OVERRIDE">
+    <ShortDescription>All classes with an internal state should provide a meaningful toString for debug purpouses.
+    </ShortDescription>
+    <LongDescription>
+      The class {0} has an internal state and should therefore override toString.
+      Having a meaningful and complete toString will help developers debug code, by providing more meaningful
+      inspections out of the box. For more information, refer to Effective Java, item 10.
+    </LongDescription>
+    <Details>
+  <![CDATA[
+    <p>All classes with an internal state should provide a meaningful toString for debug purpouses.</p>
+  ]]>
+    </Details>
+  </BugPattern>
 
   <BugCode abbrev="SYS">SYS</BugCode>
   <BugCode abbrev="JSR305">JSR305</BugCode>
@@ -312,4 +348,5 @@
   <BugCode abbrev="JUNIT">JUnit</BugCode>
   <BugCode abbrev="GUAVA">Google Guava</BugCode>
   <BugCode abbrev="FINDBUGS">FindBugs</BugCode>
+  <BugCode abbrev="EFFECTIVE">Effective Java</BugCode>
 </MessageCollection>
