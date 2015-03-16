@@ -1,5 +1,5 @@
-# FindBugs Plugins
-FindBugs plugin set from Works Applications. Mainly designed to support J2EE technology and huge project.
+# Findbugs Plugins
+Findbugs plugin set from Monits. Removing bugs before they happen by enforcing best practices.
 
 [![Build Status](https://secure.travis-ci.org/Monits/findbugs-plugin.png)](http://travis-ci.org/Monits/findbugs-plugin)
 [![Coverage Status](https://coveralls.io/repos/Monits/findbugs-plugin/badge.png)](https://coveralls.io/r/Monits/findbugs-plugin)
@@ -18,7 +18,7 @@ To use this product, please configure your findbugs-maven-plugin like below.
             <plugin>
               <groupId>com.monits</groupId>
               <artifactId>findbugs-plugin</artifactId>
-              <version>0.1.0-SNAPSHOT</version>
+              <version>0.2.0-SNAPSHOT</version>
             </plugin>
           </plugins>
         </configuration>
@@ -44,13 +44,22 @@ and make sure to reference our public repositories
 
 # history
 
-## 0.1.0-SNAPSHOT
-- forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin). Awesome plugin, but Findbugs 2 only.
+## 0.2.0-SNAPSHOT
+- Detector for Effective Java's item 10. `toString` should be overriden when a
+class has inner state. The check will make sure if members have themselves any
+state / are primitives to discard meaningless reports
+(think of a Service with a reference to a DAO).
+
+## 0.1.1
+- forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin).
+Awesome plugin, but Findbugs 2 only.
 - upgraded to Findbugs 3
 - rewrote most error messages to be more specific
 - fixed method detection for UnknownNullnessDetector
 - rewrote all unit tests, and added several new ones. Great code coverage
-- made UnexpectedAccessDetector ignore calls from methods marked as `@Test` or from a class that extends `junit.framework.TestCase`
+- made UnexpectedAccessDetector ignore calls from classes that use JUnit's
+annotations or extends `junit.framework.TestCase`, which being tests are
+ligit accesses.
 
 ## 0.0.3
 
