@@ -341,6 +341,27 @@
   ]]>
     </Details>
   </BugPattern>
+  
+  <Detector class="com.monits.findbugs.effectivejava.EqualsOverrideDetector">
+    <Details>
+      This detector will look for classes overriding equals from a super-class.
+    </Details>
+  </Detector>
+  
+  <BugPattern type="DONT_OVERRIDE_EQUALS">
+    <ShortDescription>You must not override equals if already defined by another class up in the hierarchy.
+    </ShortDescription>
+    <LongDescription>
+      The class {0} overrides equals, which was already defined by {1}.
+      Doing this breaks the general contract for equals, since symmetry will be lost.
+      For more information, refer to Effective Java, item 8.
+    </LongDescription>
+    <Details>
+  <![CDATA[
+    <p>You must not override equals if already defined by another class up in the hierarchy.</p>
+  ]]>
+    </Details>
+  </BugPattern>
 
   <BugCode abbrev="SYS">SYS</BugCode>
   <BugCode abbrev="JSR305">JSR305</BugCode>

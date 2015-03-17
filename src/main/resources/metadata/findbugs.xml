@@ -81,4 +81,9 @@
   <BugPattern type="MISSING_TO_STRING_OVERRIDE" abbrev="EFFECTIVE"
     category="BAD_PRACTICE" />
   
+  <Detector class="com.monits.findbugs.effectivejava.EqualsOverrideDetector"
+    speed="fast" hidden="false" reports="DONT_OVERRIDE_EQUALS" />
+  <BugPattern type="DONT_OVERRIDE_EQUALS" abbrev="EFFECTIVE"
+    category="BAD_PRACTICE" />
+  
 </FindbugsPlugin>
