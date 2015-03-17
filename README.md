@@ -45,10 +45,14 @@ and make sure to reference our public repositories
 # history
 
 ## 0.2.0-SNAPSHOT
-- Detector for Effective Java's item 10. `toString` should be overriden when a
+New detectors:
+- Effective Java's item 10. `toString` should be overriden when a
 class has inner state. The check will make sure if members have themselves any
 state / are primitives to discard meaningless reports
 (think of a Service with a reference to a DAO).
+- Effective Java's item 8. Never override `equals` if defined by a super-class
+other than `Object`. Doing so breaks the general `equals` contract by breaking
+*symmetry*.
 
 ## 0.1.1
 - forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin).
