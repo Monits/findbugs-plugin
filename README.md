@@ -59,30 +59,30 @@ other than `Object`. Doing so breaks the general `equals` contract by breaking
 Awesome plugin, but Findbugs 2 only.
 - upgraded to Findbugs 3
 - rewrote most error messages to be more specific
-- fixed method detection for UnknownNullnessDetector
+- fixed method detection for `UnknownNullnessDetector`
 - rewrote all unit tests, and added several new ones. Great code coverage
-- made UnexpectedAccessDetector ignore calls from classes that use JUnit's
+- made `UnexpectedAccessDetector` ignore calls from classes that use JUnit's
 annotations or extends `junit.framework.TestCase`, which being tests are
 ligit accesses.
 
 ## 0.0.3
 
-- added UnexpectedAccessDetector
-- added UndocumentedSuppressFBWarningsDetector
+- added `UnexpectedAccessDetector`
+- added `UndocumentedSuppressFBWarningsDetector`
 - upgraded JDK from 1.6 to 1.7
 
 ## 0.0.2
 
-- added BrokenImmutableClassDetector
-- added LongIndexNameDetector
-- added LongTableNameDetector
-- added LongColumnNameDetector
-- added UnknownNullnessDetector
-- added UndocumentedIgnoreDetector
-- added ImplicitLengthDetector
-- added ImplicitNullnessDetector
-- added ColumnDefinitionDetector
-- added NullablePrimitiveDetector
+- added `BrokenImmutableClassDetector`
+- added `LongIndexNameDetector`
+- added `LongTableNameDetector`
+- added `LongColumnNameDetector`
+- added `UnknownNullnessDetector`
+- added `UndocumentedIgnoreDetector`
+- added `ImplicitLengthDetector`
+- added `ImplicitNullnessDetector`
+- added `ColumnDefinitionDetector`
+- added `NullablePrimitiveDetector`
 
 ## 0.0.1
 
@@ -90,6 +90,7 @@ ligit accesses.
 
 # copyright and license
 
+    Copyright 2015 Monits S.A.
     Copyright 2013 Works Applications. Co.,Ltd.
     
     Licensed under the Apache License, Version 2.0 (the "License");
