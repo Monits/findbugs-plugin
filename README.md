@@ -46,7 +46,11 @@ and make sure to reference our public repositories
 
 ## 0.2.0-SNAPSHOT
 New detectors:
-- Effective Java's item 10. `toString` should be overriden when a
+- added `InconsistentHashCodeEqualsDetector`: this new detector will check for
+classes that uses distinct fields in the calculation of `hashCode` and `equals`.
+A class with this bug breaks the "equal objects must have equal hashcodes" invariant
+and/or may also generate hash collisions on objects that are unequal.
+- Effective Java's item 10. `toString` should be overridden when a
 class has inner state. The check will make sure if members have themselves any
 state / are primitives to discard meaningless reports
 (think of a Service with a reference to a DAO).
