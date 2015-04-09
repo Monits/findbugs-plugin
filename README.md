@@ -63,7 +63,7 @@ Awesome plugin, but Findbugs 2 only.
 - rewrote all unit tests, and added several new ones. Great code coverage
 - made `UnexpectedAccessDetector` ignore calls from classes that use JUnit's
 annotations or extends `junit.framework.TestCase`, which being tests are
-ligit accesses.
+legit accesses.
 
 ## 0.0.3
 
