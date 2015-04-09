@@ -363,6 +363,44 @@
     </Details>
   </BugPattern>
 
+  <Detector class="com.monits.findbugs.jdk.InconsistentHashCodeEqualsDetector">
+    <Details>
+      This detector will look for classes whose equals and hashCode methods' uses distinct fields from one another.
+    </Details>
+  </Detector>
+
+  <BugPattern type="HASHCHODE_HAS_MORE_FIELDS_THAN_EQUALS">
+    <ShortDescription>Your implementation of hashCode method is using more or distinct fields than the equals method.
+    </ShortDescription>
+    <LongDescription>
+      The class {0} violates the general contract for Object.hashCode(). Quoting the Javadoc:
+      "If two objects are equal according to the equals(Object) method, then calling the hashCode method on each of the two objects must produce the same integer result."
+      Using more fields to compute the hash code than for equals, allows for two instances to be equal, yet have different hash codes.
+      Add {2} to equals, or remove it from hashCode to prevent this error.
+    </LongDescription>
+    <Details>
+  <![CDATA[
+    <p>Your implementation of hashCode method is using more or distinct fields than the equals method.</p>
+  ]]>
+    </Details>
+  </BugPattern>
+
+  <BugPattern type="EQUALS_HAS_MORE_FIELDS_THAN_HASHCODE">
+    <ShortDescription>Your implementation of equals method is using more or distinct fields than the hashCode method.
+    </ShortDescription>
+    <LongDescription>
+      The class {0} uses more fields in equals than for hash codes.
+      Even though this is not strictly an error, it does generate hash code collisions for objects that are not equal, and is therefore not an optimum implementation.
+      Consider adding missing field {2} to hashCode to prevent this.
+    </LongDescription>
+    <Details>
+  <![CDATA[
+    <p>Your implementation of equals method is using more or distinct fields than the hashCode method.</p>
+  ]]>
+    </Details>
+  </BugPattern>
+
+  <BugCode abbrev="JDK">JDK</BugCode>
   <BugCode abbrev="SYS">SYS</BugCode>
   <BugCode abbrev="JSR305">JSR305</BugCode>
   <BugCode abbrev="JPA">JPA</BugCode>

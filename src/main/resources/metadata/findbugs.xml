@@ -85,5 +85,11 @@
     speed="fast" hidden="false" reports="DONT_OVERRIDE_EQUALS" />
   <BugPattern type="DONT_OVERRIDE_EQUALS" abbrev="EFFECTIVE"
     category="BAD_PRACTICE" />
-  
+
+  <Detector class="com.monits.findbugs.jdk.InconsistentHashCodeEqualsDetector"
+    speed="fast" hidden="false" reports="HASHCHODE_HAS_MORE_FIELDS_THAN_EQUALS" />
+  <BugPattern type="HASHCHODE_HAS_MORE_FIELDS_THAN_EQUALS" abbrev="JDK"
+    category="CORRECTNESS" />
+  <BugPattern type="EQUALS_HAS_MORE_FIELDS_THAN_HASHCODE" abbrev="JDK"
+    category="BAD_PRACTICE" />
 </FindbugsPlugin>
