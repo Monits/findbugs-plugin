@@ -22,14 +22,17 @@ import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.ba.AnalysisContext;
 import edu.umd.cs.findbugs.ba.BasicBlock;
 import edu.umd.cs.findbugs.ba.BasicBlock.InstructionIterator;
 import edu.umd.cs.findbugs.ba.CFG;
 import edu.umd.cs.findbugs.ba.CFGBuilderException;
 import edu.umd.cs.findbugs.ba.ClassContext;
 import edu.umd.cs.findbugs.ba.Edge;
+import edu.umd.cs.findbugs.ba.Hierarchy;
 import edu.umd.cs.findbugs.ba.XClass;
 import edu.umd.cs.findbugs.ba.XField;
+import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
@@ -118,11 +121,20 @@ public class ToStringDetector extends BytecodeScanningDetector {
 						// This is an array of primitives, interesting by default
 						toStringFields.put(f.getName(), f);
 					} else {
-						final XClass fieldXClass = Global.getAnalysisCache().getClassAnalysis(
-								XClass.class, fieldClassDescriptor);
-						if (fieldXClass != null && isStatefullClass(fieldXClass)) {
-							// The field needs a toString on itself
-							toStringFields.put(f.getName(), f);
+						// Application classes are analyzed recursively
+						if (AnalysisContext.currentAnalysisContext().isApplicationClass(fieldClassDescriptor)) {
+							final XClass fieldXClass = Global.getAnalysisCache().getClassAnalysis(
+									XClass.class, fieldClassDescriptor);
+							if (fieldXClass != null && isStatefullClass(fieldXClass)) {
+								// The field needs a toString on itself
+								toStringFields.put(f.getName(), f);
+							}
+						} else {
+							// For non-application fieds, we just check if they provide a toString() override
+							final XMethod toString = Hierarchy.findMethod(fieldClassDescriptor, "toString", "()Ljava/lang/String;", false);
+							if (toString != null && !toString.getClassName().equals("java.lang.Object")) {
+								toStringFields.put(f.getName(), f);
+							}
 						}
 					}
 				} else {

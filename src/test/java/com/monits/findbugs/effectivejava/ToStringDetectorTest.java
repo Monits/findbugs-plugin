@@ -271,4 +271,48 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+
+	@Test
+	public void testNoToStringLibraryFieldClass() throws Exception {
+		// Locate test code, a class with a field of library's type with no toString() method.
+		final String[] files = {
+			getClassFilePath("samples/effectivejava/item10/NoToStringLibraryFieldClass"),
+		};
+
+		// Add to classPath the library with no toString() used as field type in NoToStringLibraryFieldClass Class.
+		final String[] classpathes = {
+			getClass().getClassLoader().getResource("fst-1.63.jar").toString().replaceAll("^file:", ""),
+		};
+
+		// Run the analysis
+		analyze(files, classpathes, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
+
+	@Test
+	public void testToStringLibraryFieldClass() throws Exception {
+		// Locate test code, a class with a field of library's type with toString() method.
+		final String[] files = {
+			getClassFilePath("samples/effectivejava/item10/ToStringLibraryFieldClass"), // TODO; buscar clase con tostring
+		};
+
+		// Add to classPath the library with the toString() used as field type in ToStringLibraryFieldClass Class.
+		final String[] classpathes = {
+			getClass().getClassLoader().getResource("fst-1.63.jar").toString().replaceAll("^file:", ""),
+		};
+
+		// Run the analysis
+		analyze(files, classpathes, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
 }
