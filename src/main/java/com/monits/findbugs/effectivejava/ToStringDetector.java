@@ -22,6 +22,7 @@ import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.ba.AnalysisContext;
 import edu.umd.cs.findbugs.ba.BasicBlock;
 import edu.umd.cs.findbugs.ba.BasicBlock.InstructionIterator;
 import edu.umd.cs.findbugs.ba.CFG;
@@ -30,12 +31,14 @@ import edu.umd.cs.findbugs.ba.ClassContext;
 import edu.umd.cs.findbugs.ba.Edge;
 import edu.umd.cs.findbugs.ba.XClass;
 import edu.umd.cs.findbugs.ba.XField;
+import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
-import edu.umd.cs.findbugs.classfile.Global;
 
 public class ToStringDetector extends BytecodeScanningDetector {
+
+	private static final String TO_STRING = "toString";
 
 	private static final String JAVA_LANG_ENUM = "java.lang.Enum";
 
@@ -118,10 +121,8 @@ public class ToStringDetector extends BytecodeScanningDetector {
 						// This is an array of primitives, interesting by default
 						toStringFields.put(f.getName(), f);
 					} else {
-						final XClass fieldXClass = Global.getAnalysisCache().getClassAnalysis(
-								XClass.class, fieldClassDescriptor);
-						if (fieldXClass != null && isStatefullClass(fieldXClass)) {
-							// The field needs a toString on itself
+						// Field classes are analyzed recursively
+						if (isClassFieldAInterestingField(fieldClassDescriptor)) {
 							toStringFields.put(f.getName(), f);
 						}
 					}
@@ -133,6 +134,25 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		}
 		
 		return toStringFields;
+	}
+
+	private boolean isClassFieldAInterestingField(final ClassDescriptor fieldClassDescriptor)
+			throws CheckedAnalysisException {
+		final XClass fieldXClass = fieldClassDescriptor.getXClass();
+		// If class not present in ClassPath, ignore the field and report 'missing class'.
+		if (fieldXClass == null) {
+			AnalysisContext.reportMissingClass(fieldClassDescriptor);
+			return false;
+		}
+
+		if (AnalysisContext.currentAnalysisContext().isApplicationClass(fieldClassDescriptor)) {
+		    // It's an Application fields, it needs a toString on itself.
+			return isStatefullClass(fieldXClass);
+		} else {
+			// For non-application fields, just check if they provide a toString() override.
+			final XMethod toString = fieldXClass.findMethod(TO_STRING, "()Ljava/lang/String;", false);
+			return toString != null && !"java.lang.Object".equals(toString.getClassName());
+		}
 	}
 	
 	private boolean isStatefullClass(@Nonnull final XClass xClass) throws CheckedAnalysisException {
@@ -161,7 +181,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 	@Override
 	public void visitMethod(@Nonnull final Method method) {
 		// Is this toString?
-		if ("toString".equals(method.getName()) && method.getArgumentTypes().length == 0) {
+		if (TO_STRING.equals(method.getName()) && method.getArgumentTypes().length == 0) {
 			hasToStringOverride = true;
 
 			try {
