@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 script: "mvn clean install"
 after_success:
-  - mvn clean test jacoco:report coveralls:jacoco
+  - mvn clean test jacoco:report coveralls:report
 notifications:
   email:
     recipients:
