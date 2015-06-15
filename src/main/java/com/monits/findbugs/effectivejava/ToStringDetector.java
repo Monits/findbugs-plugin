@@ -35,6 +35,7 @@ import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
+import edu.umd.cs.findbugs.classfile.MissingClassException;
 import edu.umd.cs.findbugs.classfile.analysis.AnnotationValue;
 
 public class ToStringDetector extends BytecodeScanningDetector {
@@ -61,7 +62,6 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		IS_INTERESTING_CLASS_CACHE.put("java/lang/String", Boolean.TRUE);
 	}
 
-	@SuppressWarnings("PMD.EmptyCatchBlock")
 	@Override
 	public void visitClassContext(@Nonnull final ClassContext classContext) {
 		try {
@@ -101,7 +101,9 @@ public class ToStringDetector extends BytecodeScanningDetector {
 				}
 			}
 		} catch (final CheckedAnalysisException e) {
-			// There is nothing meaningful to do...
+			if (e instanceof MissingClassException) {
+				AnalysisContext.reportMissingClass((MissingClassException) e);
+			}
 		} finally {
 			interestFields = null;
 			hasToStringOverride = false;
@@ -161,11 +163,6 @@ public class ToStringDetector extends BytecodeScanningDetector {
 	private boolean isClassFieldAInterestingField(final ClassDescriptor fieldClassDescriptor)
 			throws CheckedAnalysisException {
 		final XClass fieldXClass = fieldClassDescriptor.getXClass();
-		// If class not present in ClassPath, ignore the field and report 'missing class'.
-		if (fieldXClass == null) {
-			AnalysisContext.reportMissingClass(fieldClassDescriptor);
-			return false;
-		}
 
 		if (AnalysisContext.currentAnalysisContext().isApplicationClass(fieldClassDescriptor)) {
 		    // It's an Application fields, it needs a toString on itself.
