@@ -12,7 +12,7 @@ To use this product, please configure your findbugs-maven-plugin like below.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
         <configuration>
           <plugins>
             <plugin>
