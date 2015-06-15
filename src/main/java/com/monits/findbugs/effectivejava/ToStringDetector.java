@@ -35,12 +35,14 @@ import edu.umd.cs.findbugs.ba.XMethod;
 import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
+import edu.umd.cs.findbugs.classfile.analysis.AnnotationValue;
 
 public class ToStringDetector extends BytecodeScanningDetector {
 
 	private static final String TO_STRING = "toString";
-
 	private static final String JAVA_LANG_ENUM = "java.lang.Enum";
+	private static final ClassDescriptor SUPPRESS_FB_WARNING_CD
+		= DescriptorFactory.createClassDescriptor(SuppressFBWarnings.class);
 
 	private final BugReporter bugReporter;
 
@@ -113,6 +115,10 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		
 		for (final XField f : fields) {
 			if (!f.isStatic() && !f.isSynthetic()) {
+				if (isIgnored(f)) {
+					continue;
+				}
+				
 				if (f.isReferenceType()) {
 					final String signature = f.getSignature();
 					final ClassDescriptor fieldClassDescriptor
@@ -134,6 +140,22 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		}
 		
 		return toStringFields;
+	}
+
+	private boolean isIgnored(final XField f) {
+		final AnnotationValue suppressAnnotation = f.getAnnotation(
+				ToStringDetector.SUPPRESS_FB_WARNING_CD);
+		
+		if (suppressAnnotation != null) {
+			final Object[] values = (Object[]) suppressAnnotation.getValue("value");
+			for (final Object v : values) {
+				if ("MISSING_FIELD_IN_TO_STRING".equals(v)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	private boolean isClassFieldAInterestingField(final ClassDescriptor fieldClassDescriptor)

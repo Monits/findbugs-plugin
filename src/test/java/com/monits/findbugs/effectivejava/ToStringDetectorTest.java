@@ -112,6 +112,29 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+	
+	@Test
+	public void testGoodStringIgnoredFieldClasses() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/effectivejava/item10/GoodToStringIgnoredFieldClass"),
+			getClassFilePath("samples/effectivejava/item10/GoodToStringAllIgnoredFieldClass"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.build()
+		);
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
 
 	@Test
 	public void testGoodMissingArrayClasses() throws Exception {
