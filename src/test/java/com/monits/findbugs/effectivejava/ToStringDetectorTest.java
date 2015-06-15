@@ -315,6 +315,27 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+	
+	@Test
+	public void testToStringMissingLibraryFieldClass() throws Exception {
+		// Locate test code, a class with a field of library's type with toString() method.
+		final String[] files = {
+			getClassFilePath("samples/effectivejava/item10/ToStringLibraryFieldClass"),
+		};
+
+		// Yet the jar is missing, so the class is not accessible.
+		final String[] classpathes = { };
+
+		// Run the analysis
+		analyze(files, classpathes, reporter);
+
+		// No bugs should be reported, since we are not sure
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
 
 	@Test
 	public void testLibraryNotInClassPathFieldClass() throws Exception {
