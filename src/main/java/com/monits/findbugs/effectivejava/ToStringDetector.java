@@ -52,7 +52,6 @@ public class ToStringDetector extends BytecodeScanningDetector {
 	private static final Map<String, Boolean> IS_INTERESTING_CLASS_CACHE = new HashMap<>();
 	private Map<String, XField> interestFields;
 	
-	@SuppressFBWarnings(value = "FCBL_FIELD_COULD_BE_LOCAL", justification = "False positive")
 	private boolean hasToStringOverride;
 
 	public ToStringDetector(@Nonnull final BugReporter bugReporter) {
@@ -78,7 +77,6 @@ public class ToStringDetector extends BytecodeScanningDetector {
 			}
 
 			interestFields = getInterestingFields(xClass);
-			hasToStringOverride = false;
 
 			if (!interestFields.isEmpty()) {
 				// Continue with analysis....
