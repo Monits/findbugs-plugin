@@ -36,10 +36,14 @@ import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.DescriptorFactory;
 import edu.umd.cs.findbugs.classfile.MissingClassException;
+import edu.umd.cs.findbugs.classfile.analysis.AnnotatedObject;
 import edu.umd.cs.findbugs.classfile.analysis.AnnotationValue;
 
 public class ToStringDetector extends BytecodeScanningDetector {
 
+	public static final String MISSING_FIELD_IN_TO_STRING = "MISSING_FIELD_IN_TO_STRING";
+	public static final String MISSING_TO_STRING_OVERRIDE = "MISSING_TO_STRING_OVERRIDE";
+	
 	private static final String TO_STRING = "toString";
 	private static final String JAVA_LANG_ENUM = "java.lang.Enum";
 	private static final ClassDescriptor SUPPRESS_FB_WARNING_CD
@@ -86,13 +90,13 @@ public class ToStringDetector extends BytecodeScanningDetector {
 				if (!interestFields.isEmpty()) {
 					if (hasToStringOverride) {
 						for (final Entry<String, XField> entry : interestFields.entrySet()) {
-							final BugInstance bug = new BugInstance(this, "MISSING_FIELD_IN_TO_STRING", NORMAL_PRIORITY)
+							final BugInstance bug = new BugInstance(this, MISSING_FIELD_IN_TO_STRING, NORMAL_PRIORITY)
 								.addClass(this)
 								.addField(entry.getValue());
 							bugReporter.reportBug(bug);
 						}
 					} else {
-						final BugInstance bug = new BugInstance(this, "MISSING_TO_STRING_OVERRIDE", NORMAL_PRIORITY)
+						final BugInstance bug = new BugInstance(this, MISSING_TO_STRING_OVERRIDE, NORMAL_PRIORITY)
 							.addClass(this);
 						bugReporter.reportBug(bug);
 					}
@@ -115,7 +119,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		
 		for (final XField f : fields) {
 			if (!f.isStatic() && !f.isSynthetic()) {
-				if (isIgnored(f)) {
+				if (isIgnored(f, MISSING_FIELD_IN_TO_STRING)) {
 					continue;
 				}
 				
@@ -128,7 +132,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 						toStringFields.put(f.getName(), f);
 					} else {
 						// Field classes are analyzed recursively
-						if (isClassFieldAInterestingField(fieldClassDescriptor)) {
+						if (isClassFieldAnInterestingField(fieldClassDescriptor)) {
 							toStringFields.put(f.getName(), f);
 						}
 					}
@@ -142,14 +146,14 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		return toStringFields;
 	}
 
-	private boolean isIgnored(final XField f) {
-		final AnnotationValue suppressAnnotation = f.getAnnotation(
+	private boolean isIgnored(final AnnotatedObject ao, final String error) {
+		final AnnotationValue suppressAnnotation = ao.getAnnotation(
 				ToStringDetector.SUPPRESS_FB_WARNING_CD);
 		
 		if (suppressAnnotation != null) {
 			final Object[] values = (Object[]) suppressAnnotation.getValue("value");
 			for (final Object v : values) {
-				if ("MISSING_FIELD_IN_TO_STRING".equals(v)) {
+				if (error.equals(v)) {
 					return true;
 				}
 			}
@@ -158,13 +162,13 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		return false;
 	}
 
-	private boolean isClassFieldAInterestingField(final ClassDescriptor fieldClassDescriptor)
+	private boolean isClassFieldAnInterestingField(final ClassDescriptor fieldClassDescriptor)
 			throws CheckedAnalysisException {
 		final XClass fieldXClass = fieldClassDescriptor.getXClass();
 
 		if (AnalysisContext.currentAnalysisContext().isApplicationClass(fieldClassDescriptor)) {
-		    // It's an Application fields, it needs a toString on itself.
-			return isStatefullClass(fieldXClass);
+		    // It's an Application fields, check if it needs a toString itself.
+			return !isIgnored(fieldXClass, MISSING_TO_STRING_OVERRIDE) && isStatefullClass(fieldXClass);
 		} else {
 			// For non-application fields, just check if they provide a toString() override.
 			final XMethod toString = fieldXClass.findMethod(TO_STRING, "()Ljava/lang/String;", false);

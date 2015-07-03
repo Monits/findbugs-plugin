@@ -12,9 +12,6 @@ import com.h3xstream.findbugs.test.EasyBugReporter;
 
 public class ToStringDetectorTest extends BaseDetectorTest {
 
-	private static final String MISSING_FIELD_IN_TO_STRING = "MISSING_FIELD_IN_TO_STRING";
-	private static final String MISSING_TO_STRING_OVERRIDE = "MISSING_TO_STRING_OVERRIDE";
-	
 	private EasyBugReporter reporter;
 
 	@Before
@@ -34,12 +31,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -56,12 +53,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -79,12 +76,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -103,12 +100,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -126,12 +123,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -150,12 +147,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -172,12 +169,12 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -194,13 +191,13 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.inClass("MissingToStringClass")
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 	}
@@ -217,14 +214,14 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.inClass("IncompleteToStringClass")
 				.atField("name")
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -243,14 +240,14 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.inClass("BadToStringCompositeInterestingClass")
 				.atField("gtsc")
 				.build()
 		);
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -267,7 +264,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.inClass("ArrayMissingToStringClass")
 				.atField("rawData")
 				.build()
@@ -288,7 +285,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.inClass("BadEnumCompositeClass")
 				.atField("data")
 				.build()
@@ -312,7 +309,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -334,7 +331,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -355,7 +352,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 		// No bugs should be reported, since we are not sure
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -376,7 +373,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 	}
@@ -393,13 +390,13 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.bugType(ToStringDetector.MISSING_TO_STRING_OVERRIDE)
 				.build()
 		);
 		
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
-				.bugType(MISSING_FIELD_IN_TO_STRING)
+				.bugType(ToStringDetector.MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 	}
