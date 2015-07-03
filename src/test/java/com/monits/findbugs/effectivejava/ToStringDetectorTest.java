@@ -368,7 +368,7 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 			getClassFilePath("samples/effectivejava/item10/ToStringLibraryFieldClass"),
 		};
 
-		// This line it's unnecessary, but having it make the tested case clearer.
+		// This line is unnecessary, but having it make the tested case clearer.
 		final String[] classpathes = {};
 
 		// Run the analysis
@@ -377,6 +377,29 @@ public class ToStringDetectorTest extends BaseDetectorTest {
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
 				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+	}
+	
+	@Test
+	public void testCompositeOfSuppressedToString() throws Exception {
+		final String[] files = {
+			getClassFilePath("samples/effectivejava/item10/GoodSuppressedToStringComposite"),
+			getClassFilePath("samples/effectivejava/item10/SuppressedToStringClass"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_TO_STRING_OVERRIDE)
+				.build()
+		);
+		
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(MISSING_FIELD_IN_TO_STRING)
 				.build()
 		);
 	}
