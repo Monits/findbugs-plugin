@@ -75,7 +75,7 @@
     category="BAD_PRACTICE" />
 
   <Detector class="com.monits.findbugs.effectivejava.ToStringDetector"
-    speed="fast" hidden="false" reports="MISSING_FIELD_IN_TO_STRING" />
+    speed="fast" hidden="false" reports="MISSING_FIELD_IN_TO_STRING,MISSING_TO_STRING_OVERRIDE" />
   <BugPattern type="MISSING_FIELD_IN_TO_STRING" abbrev="EFFECTIVE"
     category="BAD_PRACTICE" />
   <BugPattern type="MISSING_TO_STRING_OVERRIDE" abbrev="EFFECTIVE"
@@ -87,7 +87,7 @@
     category="BAD_PRACTICE" />
 
   <Detector class="com.monits.findbugs.jdk.InconsistentHashCodeEqualsDetector"
-    speed="fast" hidden="false" reports="HASHCHODE_HAS_MORE_FIELDS_THAN_EQUALS" />
+    speed="fast" hidden="false" reports="HASHCHODE_HAS_MORE_FIELDS_THAN_EQUALS,EQUALS_HAS_MORE_FIELDS_THAN_HASHCODE" />
   <BugPattern type="HASHCHODE_HAS_MORE_FIELDS_THAN_EQUALS" abbrev="JDK"
     category="CORRECTNESS" />
   <BugPattern type="EQUALS_HAS_MORE_FIELDS_THAN_HASHCODE" abbrev="JDK"
