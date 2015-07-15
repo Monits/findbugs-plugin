@@ -400,6 +400,26 @@
     </Details>
   </BugPattern>
 
+  <Detector class="com.monits.findbugs.jdk.UselessValueOfCallDetector">
+    <Details>
+      This detector will look for useless uses of ValueOf calls.
+    </Details>
+  </Detector>
+  <BugPattern type="USELESS_VALUEOF_CALL">
+    <ShortDescription>
+      It is unnecessary to do valueOf when you try to return the same Type of the argument given.
+    </ShortDescription>
+    <LongDescription>
+        Unnecessary call of valueOf in method {1.name} of class {0}.
+        The autoboxing of the argument given and the result of calling valueOf return the same value.
+     </LongDescription>
+    <Details>
+  <![CDATA[
+    <p>It is unnecessary to do valueOf when you try to return the same Type of the argument given.</p>
+  ]]>
+    </Details>
+  </BugPattern>
+
   <BugCode abbrev="JDK">JDK</BugCode>
   <BugCode abbrev="SYS">SYS</BugCode>
   <BugCode abbrev="JSR305">JSR305</BugCode>

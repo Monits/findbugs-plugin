@@ -92,4 +92,9 @@
     category="CORRECTNESS" />
   <BugPattern type="EQUALS_HAS_MORE_FIELDS_THAN_HASHCODE" abbrev="JDK"
     category="BAD_PRACTICE" />
+
+  <Detector class="com.monits.findbugs.jdk.UselessValueOfCallDetector"
+    speed="fast" hidden="false" reports="USELESS_VALUEOF_CALL" />
+  <BugPattern type="USELESS_VALUEOF_CALL" abbrev="JDK" category="PERFORMANCE" />
+
 </FindbugsPlugin>
