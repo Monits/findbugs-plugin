@@ -57,6 +57,9 @@ state / are primitives to discard meaningless reports
 - Effective Java's item 8. Never override `equals` if defined by a super-class
 other than `Object`. Doing so breaks the general `equals` contract by breaking
 *symmetry*.
+- added `UselessValueOfCallDetector` to detect useless calls to `valueOf`
+methods that could be handled directly by autoboxing (which the compiler
+translates to `valueOf` calls, but with cleaner code).
 
 ## 0.1.1
 - forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin).
