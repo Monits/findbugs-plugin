@@ -1,4 +1,4 @@
-package samples.findbugs.jdk.valueof;
+package samples.findbugs.jdk;
 
 import javax.annotation.Nonnull;
 
@@ -14,6 +14,11 @@ public class UselessStringValueOfCall {
 	@Nonnull
 	public String getStringValueOfDummyString() {
 		return String.valueOf(dummy.getString());
+	}
+
+	@Nonnull
+	public String getString() {
+		return "other string";
 	}
 
 	@Nonnull

@@ -400,22 +400,22 @@
     </Details>
   </BugPattern>
 
-  <Detector class="com.monits.findbugs.jdk.UselessValueOfCallDetector">
+  <Detector class="com.monits.findbugs.jdk.UselessStringValueOfCallDetector">
     <Details>
       This detector will look for useless uses of ValueOf calls.
     </Details>
   </Detector>
-  <BugPattern type="USELESS_VALUEOF_CALL">
+  <BugPattern type="USELESS_STRING_VALUEOF_CALL">
     <ShortDescription>
-      It is unnecessary to do valueOf when you try to return the same Type of the argument given.
+      It is unnecessary to do a String.valueOf of an argument that already is a string.
     </ShortDescription>
     <LongDescription>
         Unnecessary call of valueOf in method {1.name} of class {0}.
-        The autoboxing of the argument given and the result of calling valueOf return the same value.
+        The argument given and the result of calling String.valueOf return the same value.
      </LongDescription>
     <Details>
   <![CDATA[
-    <p>It is unnecessary to do valueOf when you try to return the same Type of the argument given.</p>
+    <p>It is unnecessary to do a String.valueOf of an argument that already is a string.</p>
   ]]>
     </Details>
   </BugPattern>
