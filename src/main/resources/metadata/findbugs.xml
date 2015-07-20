@@ -97,4 +97,8 @@
     speed="fast" hidden="false" reports="USELESS_STRING_VALUEOF_CALL" />
   <BugPattern type="USELESS_STRING_VALUEOF_CALL" abbrev="JDK" category="PERFORMANCE" />
 
+  <Detector class="com.monits.findbugs.jdk.NonStaticPatternCompileDetector"
+    speed="fast" hidden="false" reports="NON_STATIC_PATTERN_COMPILE_CALL" />
+  <BugPattern type="NON_STATIC_PATTERN_COMPILE_CALL" abbrev="JDK" category="PERFORMANCE" experimental="true"/>
+
 </FindbugsPlugin>

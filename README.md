@@ -59,6 +59,8 @@ other than `Object`. Doing so breaks the general `equals` contract by breaking
 *symmetry*.
 - added `UselessStringValueOfCallDetector` to detect useless `String.valueOf` calls
 when the argument given is already a string.
+- added `NonStaticPatternCompileDetector` to report methods that have locals `Pattern.compile`
+with a harcoded, static or final local regex as a static final to avoid recompiling the regex.
 
 ## 0.1.1
 - forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin).
