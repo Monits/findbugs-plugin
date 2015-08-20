@@ -154,7 +154,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 	 */
 	public static Set<XMethod> findSuperMethods(final XMethod m) {
 		final Set<XMethod> result = new HashSet<XMethod>();
-		findSuperMethods(m.getClassDescriptor(), m, result, Collections.emptyMap());
+		findSuperMethods(m.getClassDescriptor(), m, result, Collections.<String, String>emptyMap());
 		result.remove(m);
 		return result;
 	}
@@ -173,7 +173,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 				return Collections.emptyMap();
 			}
 
-			final Map<String, String> generics = new HashMap<String, String>();
+			final Map<String, String> generics = new HashMap<String, String>(parentBoundGenerics);
 
 			final int genericsStart = sourceSignature.indexOf('<', 2);
 			if (genericsStart != -1) {	// child class bounds generics?
