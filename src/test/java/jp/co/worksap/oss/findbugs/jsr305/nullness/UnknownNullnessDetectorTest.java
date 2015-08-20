@@ -88,6 +88,66 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 	}
 	
 	@Test
+	public void testUnannotatedExtendingLibClass() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedExtendingLibClass"),
+		};
+		
+		final String[] classpathes = {
+			getJarFilePath("fst-1.63.jar"),
+		};
+		
+		// Run the analysis
+		analyze(files, classpathes, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
+	
+	@Test
+	public void testUnannotatedExtendingLibClassPropagatingGenerics() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedExtendingLibClassPropagatingGenerics"),
+		};
+		
+		final String[] classpathes = {
+			getJarFilePath("fst-1.63.jar"),
+		};
+		
+		// Run the analysis
+		analyze(files, classpathes, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
+	
+	@Test
+	public void testUnannotatedIndirectGenericBinding() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedIndirectGenericBinding"),
+			getClassFilePath("samples/jsr305/nullness/UnannotatedIndirectGenericBinding$Bounded"),
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
+	
+	@Test
 	public void testUnannotatedVarargs() throws Exception {
 		// Locate test code
 		final String[] files = {

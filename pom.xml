@@ -42,6 +42,11 @@
 		</license>
 	</licenses>
 
+	<properties>
+		<!-- Use JDK7 as required by Findbugs, don't raise dependencies -->
+		<jdk.version>1.7</jdk.version>
+	</properties>
+
 	<repositories>
 		<repository>
 			<id>monits-snapshots</id>

@@ -3,10 +3,16 @@ package jp.co.worksap.oss.findbugs.jsr305.nullness;
 
 import java.lang.annotation.ElementType;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
 
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ReferenceType;
@@ -102,7 +108,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		if (superCD.getDottedClassName().equals("java.lang.Enum")) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -122,7 +128,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 				initialIndex = 1;
 			}
 		}
-		
+
 		for (int i = initialIndex; i < argumentTypes.length; ++i) {
 			if (!(argumentTypes[i] instanceof ReferenceType)
 					|| getXMethod().isVariableSynthetic(i)
@@ -141,38 +147,89 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 			}
 		}
 	}
-	
+
 	/*
 	 * We can't use {@code Hierarchy2.findMatchingMethod} since it considers return types, which is incorrect
 	 * for Java, and just doesn't work with generics. 
 	 */
 	public static Set<XMethod> findSuperMethods(final XMethod m) {
 		final Set<XMethod> result = new HashSet<XMethod>();
-
-		findSuperMethods(m.getClassDescriptor(), m, result);
+		findSuperMethods(m.getClassDescriptor(), m, result, Collections.emptyMap());
 		result.remove(m);
 		return result;
 	}
+
+	private static Map<String, String> getBoundGenericsInClassSignature(@Nonnull final ClassDescriptor c,
+			@Nonnull final Map<String, String> parentBoundGenerics) {
+		try {
+			final XClass xc = c.getXClass();
+			if (xc.getSuperclassDescriptor() == null) {
+				return Collections.emptyMap();
+			}
+
+			final String sourceSignature = xc.getSourceSignature();
+
+			if (sourceSignature == null) {
+				return Collections.emptyMap();
+			}
+
+			final Map<String, String> generics = new HashMap<String, String>();
+
+			final int genericsStart = sourceSignature.indexOf('<', 2);
+			if (genericsStart != -1) {	// child class bounds generics?
+				// Get generics bound on this class
+				final String[] boundValues = sourceSignature.substring(
+						genericsStart + 1, sourceSignature.indexOf('>', genericsStart)).split(";");
+
+				// Get generics definitions on parent
+				final XClass superxc = xc.getSuperclassDescriptor().getXClass();
+				final String superSourceSignature = superxc.getSourceSignature();
+				final String[] configValues = superSourceSignature.substring(
+						1, superSourceSignature.indexOf('>') - 1).split(";");
+
+				for (int i = 0; i < configValues.length; i++) {
+					final String actualValue;
+					if (boundValues[i].startsWith("T") && parentBoundGenerics.containsKey(boundValues[i].substring(1))) {
+						// It's a generic, get it's value from parent!
+						actualValue = parentBoundGenerics.get(boundValues[i].substring(1));
+					} else {
+						actualValue = boundValues[i];
+					}
+					
+					generics.put(configValues[i].substring(0, configValues[i].indexOf(':')), actualValue);
+				}
+			}
+
+			return generics;
+		} catch (final CheckedAnalysisException e) {
+			return Collections.emptyMap();
+		}
+	}
 	
-	private static void findSuperMethods(final ClassDescriptor c, final XMethod m, final Set<XMethod> accumulator) {
+	private static void findSuperMethods(final ClassDescriptor c, final XMethod m,
+			final Set<XMethod> accumulator, final Map<String, String> parentBoundGenerics) {
 		if (c == null) {
 			return;
 		}
 		
 		try {
 			final XClass xc = Global.getAnalysisCache().getClassAnalysis(XClass.class, c);
+			
+			// TODO : Test this when generics are propagated upstream
+			final Map<String, String> boundGenerics = getBoundGenericsInClassSignature(c, parentBoundGenerics);
+			
 			for (final XMethod xm : xc.getXMethods()) {
 				if (xm.isStatic() == m.isStatic() && xm.getName().equals(m.getName())
-						&& getArgumentSignature(xm).equals(getArgumentSignature(m))) {
+						&& signaturesMatches(xm, m, boundGenerics)) {
 					if (!accumulator.add(xm)) {
 						return;
 					}
 				}
 			}
 			
-			findSuperMethods(xc.getSuperclassDescriptor(), m, accumulator);
+			findSuperMethods(xc.getSuperclassDescriptor(), m, accumulator, boundGenerics);
 			for (final ClassDescriptor i : xc.getInterfaceDescriptorList()) {
-				findSuperMethods(i, m, accumulator);
+				findSuperMethods(i, m, accumulator, boundGenerics);
 			}
 			if (!accumulator.add(m)) {
 				return;
@@ -182,6 +239,22 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 	}
 	
+	private static boolean signaturesMatches(final XMethod superm, final XMethod m,
+			final Map<String, String> boundGenerics) {
+		// Are there generics?
+		if (superm.getSourceSignature() == null) {
+			return getArgumentSignature(superm).equals(getArgumentSignature(m));
+		}
+		
+		// Replace all generics
+		String signature = superm.getSourceSignature();
+		for (Entry<String, String> entry : boundGenerics.entrySet()) {
+			signature = signature.replaceAll("T" + entry.getKey(), entry.getValue());
+		}
+		
+		return m.getSignature().equals(signature);
+	}
+
 	private static String getArgumentSignature(final XMethod xm) {
 		final String signature = xm.getSignature();
 		return signature.substring(0, signature.indexOf(')') + 1);

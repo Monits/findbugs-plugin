@@ -3,7 +3,6 @@
   "conduit_uri" : "http://ph.monits.com/",
   "unit.engine": "MavenUnitTestEngine",
   "lint.maven.options": [
-    "-T1C"
   ],
   "unit.maven.options": [
     "-T1C"
