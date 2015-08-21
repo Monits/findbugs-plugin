@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
+import edu.umd.cs.findbugs.OpcodeStack.Item;
 import edu.umd.cs.findbugs.bcel.OpcodeStackDetector;
 
 public class UselessStringValueOfCallDetector extends OpcodeStackDetector {
@@ -36,11 +37,21 @@ public class UselessStringValueOfCallDetector extends OpcodeStackDetector {
 	public void sawOpcode(final int seen) {
 		if (seen == INVOKESTATIC
 				&& VALUE_OF.equals(getFieldDescriptorOperand().getName())
-				&& isSameTypeArgumentAndClassOperand(getClassConstantOperand(), stack.getStackItem(0).getSignature())) {
+				&& isSameTypeArgumentAndClassOperand(getClassConstantOperand(), stack.getStackItem(0).getSignature())
+				&& !isAConcatenationOfStrings()) {
 			this.bugReporter.reportBug(new BugInstance(this, USELESS_STRING_VALUEOF_CALL, NORMAL_PRIORITY)
 				.addClassAndMethod(this)
 				.addSourceLine(this));
 		}
+	}
+
+	private boolean isAConcatenationOfStrings() {
+		final Item stackItem = stack.getStackItem(0);
+		// check if the param is an undefined String
+		return "Ljava/lang/String;".equals(stackItem.getSignature()) && stackItem.getConstant() == null
+				// if the current string is not defined and is in a concatenation of strings,
+				// then the compiler use an StringBuilder to put together those objects
+				&& "Ljava/lang/StringBuilder;".equals(stack.getStackItem(1).getSignature());
 	}
 
 	private boolean isSameTypeArgumentAndClassOperand(final String classConstantOperand, final String argument) {

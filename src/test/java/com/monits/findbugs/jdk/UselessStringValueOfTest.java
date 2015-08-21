@@ -94,4 +94,61 @@ public class UselessStringValueOfTest extends BaseDetectorTest {
 				.build()
 		);
 	}
+
+	@Test
+	public void concatenatedStringFromParam() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/findbugs/jdk/UselessStringValueOfCall"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(UselessStringValueOfCallDetector.USELESS_STRING_VALUEOF_CALL)
+				.inClass("UselessStringValueOfCall")
+				.inMethod("concatenatedStringFromParam")
+				.build()
+		);
+	}
+
+	@Test
+	public void concatenatedLocalString() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/findbugs/jdk/UselessStringValueOfCall"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(UselessStringValueOfCallDetector.USELESS_STRING_VALUEOF_CALL)
+				.inClass("UselessStringValueOfCall")
+				.inMethod("concatenatedLocalString")
+				.build()
+		);
+	}
+
+	@Test
+	public void stringFromParamInValueOf() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/findbugs/jdk/UselessStringValueOfCall"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter).doReportBug(
+			bugDefinition()
+				.bugType(UselessStringValueOfCallDetector.USELESS_STRING_VALUEOF_CALL)
+				.inClass("UselessStringValueOfCall")
+				.inMethod("stringFromParamInValueOf")
+				.build()
+		);
+	}
 }
