@@ -88,6 +88,28 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 	}
 	
 	@Test
+	public void testStandardEnum() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/StandardEnum"),
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_RETURNED_VALUE")
+				.build()
+		);
+	}
+	
+	@Test
 	public void testUnannotatedExtendingLibClass() throws Exception {
 		// Locate test code
 		final String[] files = {

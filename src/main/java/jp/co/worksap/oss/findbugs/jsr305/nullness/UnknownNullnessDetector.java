@@ -184,19 +184,21 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 				// Get generics definitions on parent
 				final XClass superxc = xc.getSuperclassDescriptor().getXClass();
 				final String superSourceSignature = superxc.getSourceSignature();
-				final String[] configValues = superSourceSignature.substring(
-						1, superSourceSignature.indexOf('>') - 1).split(";");
-
-				for (int i = 0; i < configValues.length; i++) {
-					final String actualValue;
-					if (boundValues[i].startsWith("T") && parentBoundGenerics.containsKey(boundValues[i].substring(1))) {
-						// It's a generic, get it's value from parent!
-						actualValue = parentBoundGenerics.get(boundValues[i].substring(1));
-					} else {
-						actualValue = boundValues[i];
+				if (superSourceSignature != null) {
+					final String[] configValues = superSourceSignature.substring(
+							1, superSourceSignature.indexOf('>') - 1).split(";");
+	
+					for (int i = 0; i < configValues.length; i++) {
+						final String actualValue;
+						if (boundValues[i].startsWith("T") && parentBoundGenerics.containsKey(boundValues[i].substring(1))) {
+							// It's a generic, get it's value from parent!
+							actualValue = parentBoundGenerics.get(boundValues[i].substring(1));
+						} else {
+							actualValue = boundValues[i];
+						}
+						
+						generics.put(configValues[i].substring(0, configValues[i].indexOf(':')), actualValue);
 					}
-					
-					generics.put(configValues[i].substring(0, configValues[i].indexOf(':')), actualValue);
 				}
 			}
 

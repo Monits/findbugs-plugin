@@ -1,0 +1,7 @@
+package samples.jsr305.nullness;
+
+public enum StandardEnum {
+	PROCESS, CULTURE, AVAILABLE_DEVICES,
+    EQUIPEMENT_REQUEST, SUPPORT_REQUEST,
+    DEVICE_REQUEST, MANAGEMENT_ORDERS;
+}
