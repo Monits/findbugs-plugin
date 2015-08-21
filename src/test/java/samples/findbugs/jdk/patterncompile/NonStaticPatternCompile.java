@@ -93,6 +93,17 @@ public class NonStaticPatternCompile {
 		return pattern.matcher(test);
 	}
 
+	/**
+	 * Test pattern compile with a concatenated regex
+	 * @param email the email
+	 * @return The pattern with the compiled regex
+	 */
+	@Nonnull
+	public Pattern testPatternCompileWithAConcatenatedRegex(@Nonnull final String email) {
+		final String[] parts = email.split("@");
+		return Pattern.compile("^" + parts[0] + "\\+([^@]+)@" + parts[1] + "$");
+	}
+
 	private static class DummyRegex {
 		public String getRegex() {
 			return "[cdv]";

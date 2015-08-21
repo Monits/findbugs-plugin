@@ -146,7 +146,7 @@ public class PatternCompileTest extends BaseDetectorTest {
 		verify(reporter, never()).doReportBug(
 			bugDefinition()
 				.bugType(NonStaticPatternCompileDetector.NON_STATIC_PATTERN_COMPILE_CALL)
-				.inClass("StaticPatternCompile")
+				.inClass("NonStaticPatternCompile")
 				.inMethod("testNeverReportNonStaticPatternCompileWithRegexFromObject")
 				.build()
 		);
@@ -186,6 +186,26 @@ public class PatternCompileTest extends BaseDetectorTest {
 			bugDefinition()
 				.bugType(NonStaticPatternCompileDetector.NON_STATIC_PATTERN_COMPILE_CALL)
 				.inClass("StaticPatternCompile")
+				.build()
+		);
+	}
+
+	@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+	@Test
+	public void testPatternCompileWithAConcatenatedRegex() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/findbugs/jdk/patterncompile/NonStaticPatternCompile"),
+		};
+
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType(NonStaticPatternCompileDetector.NON_STATIC_PATTERN_COMPILE_CALL)
+				.inClass("NonStaticPatternCompile")
+				.inMethod("testPatternCompileWithAConcatenatedRegex")
 				.build()
 		);
 	}
