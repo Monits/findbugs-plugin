@@ -362,4 +362,22 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 					.build()
 			);
 	}
+	
+	@Test
+	public void testUnannotatedBoundGenerics() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/UnannotatedBoundGenerics"),
+			getClassFilePath("samples/jsr305/nullness/ChildOfUnannotatedBoundGenerics")
+		};
+		
+		// Run the analysis
+		analyze(files, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.build()
+		);
+	}
 }

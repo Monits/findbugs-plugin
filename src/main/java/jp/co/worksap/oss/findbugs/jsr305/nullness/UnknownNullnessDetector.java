@@ -189,6 +189,13 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 							1, superSourceSignature.indexOf('>') - 1).split(";");
 	
 					for (int i = 0; i < configValues.length; i++) {
+						final int genericNameStart = configValues[i].indexOf(':');
+						
+						if (genericNameStart == -1) {
+							// The generics are statically set (i.e Comparable<MyObject> instead of Comparable<T>)
+							continue;
+						}
+						
 						final String actualValue;
 						if (boundValues[i].startsWith("T") && parentBoundGenerics.containsKey(boundValues[i].substring(1))) {
 							// It's a generic, get it's value from parent!
@@ -197,7 +204,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 							actualValue = boundValues[i];
 						}
 						
-						generics.put(configValues[i].substring(0, configValues[i].indexOf(':')), actualValue);
+						generics.put(configValues[i].substring(0, genericNameStart), actualValue);
 					}
 				}
 			}
@@ -250,11 +257,11 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		
 		// Replace all generics
 		String signature = superm.getSourceSignature();
-		for (Entry<String, String> entry : boundGenerics.entrySet()) {
+		for (final Entry<String, String> entry : boundGenerics.entrySet()) {
 			signature = signature.replaceAll("T" + entry.getKey(), entry.getValue());
 		}
 		
-		return m.getSignature().equals(signature);
+		return m.getSourceSignature().equals(signature);
 	}
 
 	private static String getArgumentSignature(final XMethod xm) {
