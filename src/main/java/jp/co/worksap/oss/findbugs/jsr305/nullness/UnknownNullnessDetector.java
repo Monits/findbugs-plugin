@@ -1,8 +1,6 @@
 package jp.co.worksap.oss.findbugs.jsr305.nullness;
 
 
-import java.lang.annotation.ElementType;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,11 +28,9 @@ import edu.umd.cs.findbugs.ba.jsr305.TypeQualifierValue;
 import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import edu.umd.cs.findbugs.classfile.Global;
-import edu.umd.cs.findbugs.classfile.analysis.AnnotatedObject;
 
 public class UnknownNullnessDetector extends BytecodeScanningDetector {
 
-	private static final java.lang.reflect.Method GET_DEFAULT_ANNOTATION;
 	private static final TypeQualifierValue<?> NULLNESS_QUALIFIER
 		= TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
 	
@@ -139,11 +135,8 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 			TypeQualifierAnnotation annotation = TypeQualifierApplications.getEffectiveTypeQualifierAnnotation(
 					getXMethod(), i, nullness);
 			if (annotation == null) {
-				TypeQualifierAnnotation defaultAnnotation = findDefaultAnnotation(getXMethod(), nullness);
-				if (defaultAnnotation == null) {
-					bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_PARAMETER", NORMAL_PRIORITY)
-						.addClassAndMethod(this));
-				}
+				bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_PARAMETER", NORMAL_PRIORITY)
+					.addClassAndMethod(this));
 			}
 		}
 	}
@@ -269,26 +262,6 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		return signature.substring(0, signature.indexOf(')') + 1);
 	}
 
-	/**
-	 * <p>To avoid a bug of FindBugs, we need reflection (!) to call private method.</p>
-	 * @see https://sourceforge.net/p/findbugs/bugs/1194/
-	 */
-	private TypeQualifierAnnotation findDefaultAnnotation(XMethod xMethod,
-			TypeQualifierValue<?> nullness) {
-		try {
-			Object result = GET_DEFAULT_ANNOTATION.invoke(null, xMethod, nullness, ElementType.PARAMETER);
-			if (result instanceof TypeQualifierAnnotation) {
-				return (TypeQualifierAnnotation) result;
-			} else {
-				return null;
-			}
-		} catch (SecurityException | IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		} catch (InvocationTargetException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
 	private void detectUnknowNullnessOfReturnedValue(Method method,
 			TypeQualifierValue<?> nullness) {
 		if (!(method.getReturnType() instanceof ReferenceType)) {
@@ -300,17 +273,6 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		if (annotation == null) {
 			bugReporter.reportBug(new BugInstance("UNKNOWN_NULLNESS_OF_RETURNED_VALUE", NORMAL_PRIORITY)
 				.addClassAndMethod(this));
-		}
-	}
-
-	static {
-		try {
-			GET_DEFAULT_ANNOTATION = TypeQualifierApplications.class
-					.getDeclaredMethod("getDefaultAnnotation",
-							AnnotatedObject.class, TypeQualifierValue.class, ElementType.class);
-			GET_DEFAULT_ANNOTATION.setAccessible(true);
-		} catch (SecurityException | NoSuchMethodException e) {
-			throw new IllegalStateException(e);
 		}
 	}
 }
