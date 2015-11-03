@@ -174,37 +174,50 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 				final String[] boundValues = sourceSignature.substring(
 						genericsStart + 1, sourceSignature.indexOf('>', genericsStart)).split(";");
 
-				// Get generics definitions on parent
+				// Get generics definitions on parent class
 				final XClass superxc = xc.getSuperclassDescriptor().getXClass();
-				final String superSourceSignature = superxc.getSourceSignature();
-				if (superSourceSignature != null) {
-					final String[] configValues = superSourceSignature.substring(
-							1, superSourceSignature.indexOf('>') - 1).split(";");
-	
-					for (int i = 0; i < configValues.length; i++) {
-						final int genericNameStart = configValues[i].indexOf(':');
-						
-						if (genericNameStart == -1) {
-							// The generics are statically set (i.e Comparable<MyObject> instead of Comparable<T>)
-							continue;
-						}
-						
-						final String actualValue;
-						if (boundValues[i].startsWith("T") && parentBoundGenerics.containsKey(boundValues[i].substring(1))) {
-							// It's a generic, get it's value from parent!
-							actualValue = parentBoundGenerics.get(boundValues[i].substring(1));
-						} else {
-							actualValue = boundValues[i];
-						}
-						
-						generics.put(configValues[i].substring(0, genericNameStart), actualValue);
-					}
+				extractGenericsFromSuperclass(parentBoundGenerics, generics,
+						boundValues, superxc);
+				
+				for (final ClassDescriptor i : xc.getInterfaceDescriptorList()) {
+					extractGenericsFromSuperclass(parentBoundGenerics, generics,
+							boundValues, i.getXClass());
 				}
 			}
 
 			return generics;
 		} catch (final CheckedAnalysisException e) {
 			return Collections.emptyMap();
+		}
+	}
+
+	private static void extractGenericsFromSuperclass(
+			final Map<String, String> parentBoundGenerics,
+			final Map<String, String> generics, final String[] boundValues,
+			final XClass superxc) {
+		final String superSourceSignature = superxc.getSourceSignature();
+		if (superSourceSignature != null) {
+			final String[] configValues = superSourceSignature.substring(
+					1, superSourceSignature.indexOf('>') - 1).split(";");
+
+			for (int i = 0; i < configValues.length; i++) {
+				final int genericNameStart = configValues[i].indexOf(':');
+				
+				if (genericNameStart == -1) {
+					// The generics are statically set (i.e Comparable<MyObject> instead of Comparable<T>)
+					continue;
+				}
+				
+				final String actualValue;
+				if (boundValues[i].startsWith("T") && parentBoundGenerics.containsKey(boundValues[i].substring(1))) {
+					// It's a generic, get it's value from parent!
+					actualValue = parentBoundGenerics.get(boundValues[i].substring(1));
+				} else {
+					actualValue = boundValues[i];
+				}
+				
+				generics.put(configValues[i].substring(0, genericNameStart), actualValue);
+			}
 		}
 	}
 	
@@ -253,8 +266,9 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		for (final Entry<String, String> entry : boundGenerics.entrySet()) {
 			signature = signature.replaceAll("T" + entry.getKey(), entry.getValue());
 		}
+		final String actualSignature = m.getSourceSignature() == null ? m.getSignature() : m.getSourceSignature();
 		
-		return m.getSourceSignature().equals(signature);
+		return actualSignature.equals(signature);
 	}
 
 	private static String getArgumentSignature(final XMethod xm) {
