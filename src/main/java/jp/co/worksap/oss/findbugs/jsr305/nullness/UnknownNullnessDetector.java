@@ -264,7 +264,7 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		// Replace all generics
 		String signature = superm.getSourceSignature();
 		for (final Entry<String, String> entry : boundGenerics.entrySet()) {
-			signature = signature.replaceAll("T" + entry.getKey(), entry.getValue());
+			signature = signature.replaceAll("T" + Pattern.quote(entry.getKey()), Matcher.quoteReplacement(entry.getValue()));
 		}
 		final String actualSignature = m.getSourceSignature() == null ? m.getSignature() : m.getSourceSignature();
 		
