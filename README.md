@@ -63,7 +63,7 @@ when the argument given is already a string.
 with a harcoded, static or final local regex as a static final to avoid recompiling the regex.
 
 ## 0.1.1
-- forked from [WorksApplication's original plugin](WorksApplications/findbugs-plugin).
+- forked from [WorksApplication's original plugin](https://github.com/arxes-tolina/findbugs-plugin).
 Awesome plugin, but Findbugs 2 only.
 - upgraded to Findbugs 3
 - rewrote most error messages to be more specific
