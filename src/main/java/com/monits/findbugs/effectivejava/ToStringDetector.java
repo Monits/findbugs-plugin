@@ -39,28 +39,47 @@ import edu.umd.cs.findbugs.classfile.MissingClassException;
 import edu.umd.cs.findbugs.classfile.analysis.AnnotatedObject;
 import edu.umd.cs.findbugs.classfile.analysis.AnnotationValue;
 
+/**
+ * ToStringDetector tries to detect issues with ToString() method.
+ *
+ * This detector will warn you if:
+ *
+ * - Your class has internal state but doesn't override ToString() method.
+ *
+ * - Your class has an internal variable that is not used in ToString() method.
+ *
+ * Enums and static fields are ignored.
+ *
+ * Interfaces and external libraries without ToString() are ignored too.
+ */
 public class ToStringDetector extends BytecodeScanningDetector {
 
 	public static final String MISSING_FIELD_IN_TO_STRING = "MISSING_FIELD_IN_TO_STRING";
 	public static final String MISSING_TO_STRING_OVERRIDE = "MISSING_TO_STRING_OVERRIDE";
-	
+
 	private static final String TO_STRING = "toString";
 	private static final String JAVA_LANG_ENUM = "java.lang.Enum";
-	private static final ClassDescriptor SUPPRESS_FB_WARNING_CD
-		= DescriptorFactory.createClassDescriptor(SuppressFBWarnings.class);
+	private static final ClassDescriptor SUPPRESS_FB_WARNING_CD = DescriptorFactory
+			.createClassDescriptor(SuppressFBWarnings.class);
 
 	private final BugReporter bugReporter;
 
-	@SuppressFBWarnings(value = "PMB_POSSIBLE_MEMORY_BLOAT",
-			justification = "We need this as database.")
+	@SuppressFBWarnings(value = "PMB_POSSIBLE_MEMORY_BLOAT", justification = "We need this as database.")
 	private static final Map<String, Boolean> IS_INTERESTING_CLASS_CACHE = new HashMap<>();
 	private Map<String, XField> interestFields;
-	
+
 	private boolean hasToStringOverride;
 
+	/**
+	 * Creates a new ToStringDetector.
+	 *
+	 * @param bugReporter
+	 *            the Findbugs bug reporter.
+	 *
+	 */
 	public ToStringDetector(@Nonnull final BugReporter bugReporter) {
 		this.bugReporter = bugReporter;
-		
+
 		// Known interesting classes
 		IS_INTERESTING_CLASS_CACHE.put("java/lang/String", Boolean.TRUE);
 	}
@@ -69,11 +88,11 @@ public class ToStringDetector extends BytecodeScanningDetector {
 	public void visitClassContext(@Nonnull final ClassContext classContext) {
 		try {
 			final XClass xClass = classContext.getXClass();
-			
+
 			if (xClass == null) {
 				return;
 			}
-			
+
 			// Never report on enums, they are good as they are
 			final ClassDescriptor superCD = xClass.getSuperclassDescriptor();
 			if (superCD != null && JAVA_LANG_ENUM.equals(superCD.getDottedClassName())) {
@@ -91,13 +110,12 @@ public class ToStringDetector extends BytecodeScanningDetector {
 					if (hasToStringOverride) {
 						for (final Entry<String, XField> entry : interestFields.entrySet()) {
 							final BugInstance bug = new BugInstance(this, MISSING_FIELD_IN_TO_STRING, NORMAL_PRIORITY)
-								.addClass(this)
-								.addField(entry.getValue());
+									.addClass(this).addField(entry.getValue());
 							bugReporter.reportBug(bug);
 						}
 					} else {
 						final BugInstance bug = new BugInstance(this, MISSING_TO_STRING_OVERRIDE, NORMAL_PRIORITY)
-							.addClass(this);
+								.addClass(this);
 						bugReporter.reportBug(bug);
 					}
 				}
@@ -111,24 +129,25 @@ public class ToStringDetector extends BytecodeScanningDetector {
 			hasToStringOverride = false;
 		}
 	}
-	
+
 	@Nonnull
 	private Map<String, XField> getInterestingFields(@Nonnull final XClass xClass) throws CheckedAnalysisException {
 		final List<? extends XField> fields = xClass.getXFields();
 		final Map<String, XField> toStringFields = new HashMap<String, XField>();
-		
+
 		for (final XField f : fields) {
 			if (!f.isStatic() && !f.isSynthetic()) {
 				if (isIgnored(f, MISSING_FIELD_IN_TO_STRING)) {
 					continue;
 				}
-				
+
 				if (f.isReferenceType()) {
 					final String signature = f.getSignature();
-					final ClassDescriptor fieldClassDescriptor
-						= DescriptorFactory.createClassDescriptorFromFieldSignature(signature);
+					final ClassDescriptor fieldClassDescriptor = DescriptorFactory
+							.createClassDescriptorFromFieldSignature(signature);
 					if (fieldClassDescriptor == null) {
-						// This is an array of primitives, interesting by default
+						// This is an array of primitives, interesting by
+						// default
 						toStringFields.put(f.getName(), f);
 					} else {
 						// Field classes are analyzed recursively
@@ -142,14 +161,13 @@ public class ToStringDetector extends BytecodeScanningDetector {
 				}
 			}
 		}
-		
+
 		return toStringFields;
 	}
 
 	private boolean isIgnored(final AnnotatedObject ao, final String error) {
-		final AnnotationValue suppressAnnotation = ao.getAnnotation(
-				ToStringDetector.SUPPRESS_FB_WARNING_CD);
-		
+		final AnnotationValue suppressAnnotation = ao.getAnnotation(ToStringDetector.SUPPRESS_FB_WARNING_CD);
+
 		if (suppressAnnotation != null) {
 			final Object[] values = (Object[]) suppressAnnotation.getValue("value");
 			for (final Object v : values) {
@@ -158,7 +176,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -167,36 +185,43 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		final XClass fieldXClass = fieldClassDescriptor.getXClass();
 
 		if (AnalysisContext.currentAnalysisContext().isApplicationClass(fieldClassDescriptor)) {
-		    // It's an Application fields, check if it needs a toString itself.
+			// It's an Application fields, check if it needs a toString itself.
 			return !isIgnored(fieldXClass, MISSING_TO_STRING_OVERRIDE) && isStatefullClass(fieldXClass);
 		} else {
-			// For non-application fields, just check if they provide a toString() override.
+			// For non-application fields, just check if they provide a
+			// toString() override.
 			final XMethod toString = fieldXClass.findMethod(TO_STRING, "()Ljava/lang/String;", false);
 			return toString != null && !"java.lang.Object".equals(toString.getClassName());
 		}
 	}
-	
+
 	private boolean isStatefullClass(@Nonnull final XClass xClass) throws CheckedAnalysisException {
 		final String className = xClass.getClassDescriptor().getClassName();
 		if (IS_INTERESTING_CLASS_CACHE.containsKey(className)) {
 			return IS_INTERESTING_CLASS_CACHE.get(className);
 		}
-		
+
 		// Is it an enum?
 		final ClassDescriptor superCD = xClass.getSuperclassDescriptor();
 		if (superCD != null && JAVA_LANG_ENUM.equals(superCD.getDottedClassName())) {
 			IS_INTERESTING_CLASS_CACHE.put(className, Boolean.TRUE);
 			return true;
 		}
-		
+
 		// Default to false in case of cross references between classes...
 		IS_INTERESTING_CLASS_CACHE.put(className, Boolean.FALSE);
-		
+
 		final Map<String, XField> interestingFields = getInterestingFields(xClass);
 		final Boolean ret = interestingFields.isEmpty() ? Boolean.FALSE : Boolean.TRUE;
 		IS_INTERESTING_CLASS_CACHE.put(className, ret);
-		
+
 		return ret;
+	}
+
+	@Override
+	public String toString() {
+		return "ToStringDetector [bugReporter=" + bugReporter + ", interestFields=" + interestFields
+				+ ", hasToStringOverride=" + hasToStringOverride + "]";
 	}
 
 	@Override
@@ -215,9 +240,8 @@ public class ToStringDetector extends BytecodeScanningDetector {
 			}
 		}
 	}
-	
-	private void checkBlock(@Nonnull final BasicBlock bb,
-			@Nonnull final ConstantPoolGen cpg, @Nonnull final CFG cfg) {
+
+	private void checkBlock(@Nonnull final BasicBlock bb, @Nonnull final ConstantPoolGen cpg, @Nonnull final CFG cfg) {
 		final BitSet visitedBlock = new BitSet();
 		final Deque<BasicBlock> toBeProcessed = new LinkedList<BasicBlock>();
 		toBeProcessed.add(bb);
@@ -233,7 +257,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 				if (ins instanceof FieldInstruction) {
 					final FieldInstruction fi = (FieldInstruction) ins;
 					final String fieldName = fi.getFieldName(cpg);
-					
+
 					if (ins instanceof GETFIELD) {
 						// TODO : Make sure we are actually using it to place it in the string representation
 						interestFields.remove(fieldName);
@@ -252,7 +276,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 				final Edge e = oei.next();
 				final BasicBlock cb = e.getTarget();
 				final int label = cb.getLabel();
-				
+
 				// Avoid repeated blocks
 				if (!visitedBlock.get(label)) {
 					toBeProcessed.addLast(cb);

@@ -14,23 +14,28 @@ import org.objectweb.asm.Opcodes;
 
 import edu.umd.cs.findbugs.bcel.AnnotationDetector;
 
-
 /**
- * <p>Simple ClassVisitor implementation to find visited field in the specified method.</p>
- * <p>To create instance, you need to provide name and descriptor to specify the target method.</p>
+ * <p>
+ * Simple ClassVisitor implementation to find visited field in the specified
+ * method.
+ * </p>
+ * <p>
+ * To create instance, you need to provide name and descriptor to specify the
+ * target method.
+ * </p>
  *
  * @author Kengo TODA
  */
 final class VisitedFieldFinder extends ClassVisitor {
 	private final class MethodVisitorExtension extends MethodVisitor {
-		private MethodVisitorExtension(int api) {
+		private MethodVisitorExtension(final int api) {
 			super(api);
 		}
 
 		@Override
-		public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+		public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
 			visitedFieldName = name;
-			//super.visitFieldInsn(opcode, owner, name, desc);
+			// super.visitFieldInsn(opcode, owner, name, desc);
 		}
 	}
 
@@ -40,10 +45,16 @@ final class VisitedFieldFinder extends ClassVisitor {
 
 	private String visitedFieldName;
 
-	public VisitedFieldFinder(@Nonnull String targetMethodName, @Nonnull String targetMethodDescriptor) {
+	VisitedFieldFinder(@Nonnull final String targetMethodName, @Nonnull final String targetMethodDescriptor) {
 		super(API_VERSION);
 		this.targetMethodName = checkNotNull(targetMethodName);
 		this.targetMethodDescriptor = checkNotNull(targetMethodDescriptor);
+	}
+
+	@Override
+	public String toString() {
+		return "VisitedFieldFinder [targetMethodName=" + targetMethodName + ", targetMethodDescriptor="
+				+ targetMethodDescriptor + ", visitedFieldName=" + visitedFieldName + "]";
 	}
 
 	@CheckReturnValue
@@ -53,10 +64,10 @@ final class VisitedFieldFinder extends ClassVisitor {
 	}
 
 	@Override
-	public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+	public MethodVisitor visitMethod(final int access, final String name, final String descriptor,
+			final String signature, final String[] exceptions) {
 		if (name.equals(targetMethodName) && descriptor.equals(targetMethodDescriptor)) {
-			MethodVisitor methodVisitor = new MethodVisitorExtension(API_VERSION);
-			return methodVisitor;
+			return new MethodVisitorExtension(API_VERSION);
 		} else {
 			// We do not have to analyze this method.
 			// Returning null let ASM skip parsing this method.
@@ -64,27 +75,32 @@ final class VisitedFieldFinder extends ClassVisitor {
 		}
 	}
 
-	//	@Override
-	//	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-	//		return null;
+	// @Override
+	// public FieldVisitor visitField(int access, String name, String desc,
+	// String signature, Object value) {
+	// return null;
 	//
-	//	}
+	// }
 
-	//	@Override
-	//	public void visitFieldInsn(int code, String owner, String name, String description) {
-	//		visitedFieldName = name;
-	//	}
+	// @Override
+	// public void visitFieldInsn(int code, String owner, String name, String
+	// description) {
+	// visitedFieldName = name;
+	// }
 
 	@Nullable
 	@CheckReturnValue
-	static String findFieldWhichisVisitedInVisitingMethod(AnnotationDetector detector) {
-		byte[] classByteCode = detector.getClassContext().getJavaClass().getBytes();
-		ClassReader reader = new ClassReader(classByteCode);
+	static String findFieldWhichisVisitedInVisitingMethod(final AnnotationDetector detector) {
+		final byte[] classByteCode = detector.getClassContext().getJavaClass().getBytes();
+		final ClassReader reader = new ClassReader(classByteCode);
 
-		FieldOrMethod targetMethod = detector.getMethod();
-		// note: bcel's #getSignature() method returns String like "(J)V", this is named as "descriptor" in the context of ASM.
-		// This is the reason why we call `targetMethod.getSignature()` to get value for `targetMethodDescriptor` argument.
-		VisitedFieldFinder visitedFieldFinder = new VisitedFieldFinder(targetMethod.getName(), targetMethod.getSignature());
+		final FieldOrMethod targetMethod = detector.getMethod();
+		// note: bcel's #getSignature() method returns String like "(J)V", this
+		// is named as "descriptor" in the context of ASM.
+		// This is the reason why we call `targetMethod.getSignature()` to get
+		// value for `targetMethodDescriptor` argument.
+		final VisitedFieldFinder visitedFieldFinder = new VisitedFieldFinder(targetMethod.getName(),
+				targetMethod.getSignature());
 		reader.accept(visitedFieldFinder, 0);
 		return visitedFieldFinder.getVisitedFieldName();
 	}
