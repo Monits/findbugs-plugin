@@ -2,6 +2,9 @@ package jp.co.worksap.oss.findbugs.jsr305;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.bcel.classfile.ElementValue;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
@@ -26,9 +29,13 @@ public class BrokenImmutableClassDetector extends AnnotationDetector {
 
     private final BugReporter reporter;
 
-    public BrokenImmutableClassDetector(BugReporter reporter) {
-        this.reporter = reporter;
-    }
+	/**
+	* Create a new BrokenImmutableClassDetector.
+	* @param reporter the Bug Reporter to use.
+	*/
+	public BrokenImmutableClassDetector(@Nonnull final BugReporter reporter) {
+		this.reporter = reporter;
+	}
 
     @Override
     public void visitAnnotation(@DottedClassName String annotationClass,
@@ -49,19 +56,19 @@ public class BrokenImmutableClassDetector extends AnnotationDetector {
         }
     }
 
-    private void checkImmutability(JavaClass immutableClass) throws ClassNotFoundException {
-        if (immutableClass == null) {
-            return;
-        }
-        for (Field field : immutableClass.getFields()) {
-            if (!field.isStatic() && !field.isFinal()) {
-                reporter.reportBug(new BugInstance(this, "BROKEN_IMMUTABILITY", HIGH_PRIORITY)
-                        .addClass(immutableClass)
-                        .addString(field.getName())
-                        .addString(immutableClass.getClassName())
-                        .addString(getThisClass().getClassName()));
-            }
-        }
-        checkImmutability(immutableClass.getSuperClass());
-    }
+	private void checkImmutability(@Nullable final JavaClass immutableClass) throws ClassNotFoundException {
+		if (immutableClass == null) {
+			return;
+		}
+		for (final Field field : immutableClass.getFields()) {
+			if (!field.isStatic() && !field.isFinal()) {
+				reporter.reportBug(new BugInstance(this, "BROKEN_IMMUTABILITY", HIGH_PRIORITY)
+					.addClass(immutableClass)
+					.addString(field.getName())
+					.addString(immutableClass.getClassName())
+					.addString(getThisClass().getClassName()));
+			}
+		}
+		checkImmutability(immutableClass.getSuperClass());
+	}
 }

@@ -22,7 +22,11 @@ import edu.umd.cs.findbugs.internalAnnotations.DottedClassName;
 abstract class AbstractColumnDetector extends AnnotationDetector {
     private final BugReporter bugReporter;
 
-    AbstractColumnDetector(BugReporter bugReporter) {
+    /**
+     * Creates a new AbstractColumnDetector.
+     * @param bugReporter the Bug Reporter to use.
+     */
+    AbstractColumnDetector(@Nonnull final BugReporter bugReporter) {
         this.bugReporter = bugReporter;
     }
 
@@ -66,7 +70,7 @@ abstract class AbstractColumnDetector extends AnnotationDetector {
         return false;
     }
 
-    private Type findVisitingColumnType() {
+    private @Nonnull Type findVisitingColumnType() {
         final Type columnType;
         if (visitingField()) {
             columnType = getField().getType();
@@ -95,6 +99,6 @@ abstract class AbstractColumnDetector extends AnnotationDetector {
         return visitingField;
     }
 
-    protected abstract void verifyColumn(Type columnType, Map<String, ElementValue> elements);
+    protected abstract void verifyColumn(@Nonnull Type columnType, @Nonnull Map<String, ElementValue> elements);
 
 }

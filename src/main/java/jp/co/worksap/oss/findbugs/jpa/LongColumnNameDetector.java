@@ -2,6 +2,8 @@ package jp.co.worksap.oss.findbugs.jpa;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.apache.bcel.classfile.ElementValue;
 import org.apache.bcel.classfile.Method;
 import org.apache.commons.lang.IllegalClassException;
@@ -30,7 +32,7 @@ public class LongColumnNameDetector extends AnnotationDetector {
 
     private final BugReporter bugReporter;
 
-    public LongColumnNameDetector(BugReporter bugReporter) {
+    public LongColumnNameDetector(@Nonnull BugReporter bugReporter) {
         this.bugReporter = bugReporter;
     }
 
@@ -61,7 +63,7 @@ public class LongColumnNameDetector extends AnnotationDetector {
         detectLongName(columnName);
     }
 
-    private void detectLongName(String tableName) {
+    private void detectLongName(@Nonnull String tableName) {
         if (tableName.length() > MAX_TABLE_LENGTH) {
             bugReporter.reportBug(new BugInstance(this, "LONG_COLUMN_NAME",
                     HIGH_PRIORITY).addClass(this));

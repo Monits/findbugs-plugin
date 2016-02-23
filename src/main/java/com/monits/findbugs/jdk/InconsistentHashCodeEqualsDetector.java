@@ -197,16 +197,16 @@ public class InconsistentHashCodeEqualsDetector extends BytecodeScanningDetector
 		private final XMethod method;
 		private final Set<XField> fieldNames;
 
-		protected XMethodAndFields(final XMethod method, final Set<XField> fieldNames) {
+		protected XMethodAndFields(@Nonnull final XMethod method, @Nonnull final Set<XField> fieldNames) {
 			this.method = method;
 			this.fieldNames = fieldNames;
 		}
 
-		public XMethod getXMethod() {
+		@Nonnull public XMethod getXMethod() {
 			return method;
 		}
 
-		public Set<XField> getFieldNames() {
+		@Nonnull public Set<XField> getFieldNames() {
 			return fieldNames;
 		}
 	}

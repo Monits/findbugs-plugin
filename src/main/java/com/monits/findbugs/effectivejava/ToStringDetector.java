@@ -165,7 +165,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		return toStringFields;
 	}
 
-	private boolean isIgnored(final AnnotatedObject ao, final String error) {
+	private static boolean isIgnored(@Nonnull final AnnotatedObject ao, @Nonnull final String error) {
 		final AnnotationValue suppressAnnotation = ao.getAnnotation(ToStringDetector.SUPPRESS_FB_WARNING_CD);
 
 		if (suppressAnnotation != null) {
@@ -180,7 +180,7 @@ public class ToStringDetector extends BytecodeScanningDetector {
 		return false;
 	}
 
-	private boolean isClassFieldAnInterestingField(final ClassDescriptor fieldClassDescriptor)
+	private boolean isClassFieldAnInterestingField(@Nonnull final ClassDescriptor fieldClassDescriptor)
 			throws CheckedAnalysisException {
 		final XClass fieldXClass = fieldClassDescriptor.getXClass();
 

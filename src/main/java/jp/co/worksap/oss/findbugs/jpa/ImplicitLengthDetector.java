@@ -2,6 +2,8 @@ package jp.co.worksap.oss.findbugs.jpa;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.apache.bcel.classfile.ElementValue;
 import org.apache.bcel.generic.Type;
 
@@ -20,7 +22,7 @@ public class ImplicitLengthDetector extends AbstractColumnDetector {
 
     private static final int MAX_LENGTH_OF_VARCHAR = Math.min(MAX_LENGTH_OF_ORACLE_VARCHAR, MAX_LENGTH_OF_DB2_VARCHAR);
 
-    public ImplicitLengthDetector(BugReporter bugReporter) {
+    public ImplicitLengthDetector(final BugReporter bugReporter) {
         super(bugReporter);
     }
 
@@ -64,7 +66,7 @@ public class ImplicitLengthDetector extends AbstractColumnDetector {
     /**
      * @return true if column type requires length property.
      */
-    private boolean isTarget(Type columnType) {
+    private boolean isTarget(@Nonnull Type columnType) {
         return Type.STRING.equals(columnType) || Type.STRINGBUFFER.equals(columnType);
     }
 

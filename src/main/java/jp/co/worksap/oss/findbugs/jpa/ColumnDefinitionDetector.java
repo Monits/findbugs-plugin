@@ -23,7 +23,7 @@ public class ColumnDefinitionDetector extends AnnotationDetector {
 
     private final BugReporter reporter;
 
-    public ColumnDefinitionDetector(BugReporter reporter) {
+    public ColumnDefinitionDetector(@Nonnull BugReporter reporter) {
         this.reporter = reporter;
     }
 

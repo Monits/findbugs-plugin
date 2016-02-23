@@ -54,7 +54,8 @@ public class UselessStringValueOfCallDetector extends OpcodeStackDetector {
 				&& "Ljava/lang/StringBuilder;".equals(stack.getStackItem(1).getSignature());
 	}
 
-	private boolean isSameTypeArgumentAndClassOperand(final String classConstantOperand, final String argument) {
+	private boolean isSameTypeArgumentAndClassOperand(@Nonnull final String classConstantOperand,
+			@Nonnull final String argument) {
 		return CLASSNAME_SIGNATURE_MAP.containsKey(classConstantOperand)
 				&& argument.equals(CLASSNAME_SIGNATURE_MAP.get(classConstantOperand));
 	}

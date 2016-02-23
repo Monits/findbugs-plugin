@@ -90,7 +90,7 @@ final class VisitedFieldFinder extends ClassVisitor {
 
 	@Nullable
 	@CheckReturnValue
-	static String findFieldWhichisVisitedInVisitingMethod(final AnnotationDetector detector) {
+	static String findFieldWhichisVisitedInVisitingMethod(@Nonnull final AnnotationDetector detector) {
 		final byte[] classByteCode = detector.getClassContext().getJavaClass().getBytes();
 		final ClassReader reader = new ClassReader(classByteCode);
 

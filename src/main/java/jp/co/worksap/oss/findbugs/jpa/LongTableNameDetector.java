@@ -2,6 +2,8 @@ package jp.co.worksap.oss.findbugs.jpa;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.apache.bcel.classfile.ElementValue;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,7 +26,7 @@ public class LongTableNameDetector extends AnnotationDetector {
 
     private final BugReporter bugReporter;
 
-    public LongTableNameDetector(BugReporter bugReporter) {
+    public LongTableNameDetector(@Nonnull BugReporter bugReporter) {
         this.bugReporter = bugReporter;
     }
 
@@ -44,7 +46,7 @@ public class LongTableNameDetector extends AnnotationDetector {
     }
 
     @VisibleForTesting
-    String trimPackage(@SlashedClassName String className) {
+    @Nonnull String trimPackage(@Nonnull @SlashedClassName String className) {
         int index = className.lastIndexOf('/');
         if (index < 0) {
             return className;
@@ -53,7 +55,7 @@ public class LongTableNameDetector extends AnnotationDetector {
         }
     }
 
-    private void detectLongName(String tableName) {
+    private void detectLongName(@Nonnull String tableName) {
         if (tableName.length() > MAX_TABLE_LENGTH) {
             bugReporter.reportBug(new BugInstance(this, "LONG_TABLE_NAME",
                     HIGH_PRIORITY).addClass(this));

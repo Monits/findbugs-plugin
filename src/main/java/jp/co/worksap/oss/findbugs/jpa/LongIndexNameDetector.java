@@ -2,6 +2,8 @@ package jp.co.worksap.oss.findbugs.jpa;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.apache.bcel.classfile.ElementValue;
 
 import com.google.common.base.Objects;
@@ -23,7 +25,7 @@ public class LongIndexNameDetector extends AnnotationDetector {
     private static final String PARAMETER_NAME_OF_OPENJPA = "name";
     private final BugReporter bugReporter;
 
-    public LongIndexNameDetector(BugReporter bugReporter) {
+    public LongIndexNameDetector(@Nonnull BugReporter bugReporter) {
         this.bugReporter = bugReporter;
     }
 
@@ -38,17 +40,17 @@ public class LongIndexNameDetector extends AnnotationDetector {
     }
 
     private boolean visitingOpenJPAAnnotation(
-            @DottedClassName String annotationClass) {
+            @Nonnull @DottedClassName String annotationClass) {
         return Objects.equal(annotationClass, "org.apache.openjpa.persistence.jdbc.Index");
     }
 
     private boolean visitingHibernateAnnotation(
-            @DottedClassName String annotationClass) {
+            @Nonnull @DottedClassName String annotationClass) {
         return Objects.equal(annotationClass, "org.hibernate.annotations.Index");
     }
 
-    private void detectLongName(final Map<String, ElementValue> map,
-            final String parameterName) {
+    private void detectLongName(@Nonnull final Map<String, ElementValue> map,
+            @Nonnull final String parameterName) {
         final ElementValue indexName = map.get(parameterName);
         if (indexName != null
                 && indexName.stringifyValue().length() > MAX_INDEX_LENGTH) {

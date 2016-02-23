@@ -32,8 +32,12 @@ public class UndocumentedSuppressFBWarningsDetector extends BytecodeScanningDete
     @Nonnull
     private final BugReporter bugReporter;
 
-    public UndocumentedSuppressFBWarningsDetector(BugReporter bugReporter) {
-        this.bugReporter = checkNotNull(bugReporter);
+    /**
+     * Creates a new UndocumentedSupressFBWarningDetector
+     * @param bugReporter the Bug Reporter to use.
+     */
+    public UndocumentedSuppressFBWarningsDetector(@Nonnull final BugReporter bugReporter) {
+    	this.bugReporter = bugReporter;
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ReferenceType;
@@ -33,15 +34,19 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 
 	private static final TypeQualifierValue<?> NULLNESS_QUALIFIER
 		= TypeQualifierValue.getValue(JSR305NullnessAnnotations.NONNULL, null);
-	
+
 	private static final Pattern ANONYMOUS_CLASSNAME_PATTERN = Pattern.compile("\\$[0-9]+$");
-	
+
 	private final BugReporter bugReporter;
 
-	public UnknownNullnessDetector(BugReporter bugReporter) {
+	/**
+	 * Creates a new UnknownNullnessDetector.
+	 * @param bugReporter the bug reporter to use.
+	 */
+	public UnknownNullnessDetector(@Nonnull final BugReporter bugReporter) {
 		this.bugReporter = bugReporter;
 	}
-	
+
 	@Override
 	public void visit(final Method method) {
 		final XMethod xMethod = getXMethod();
@@ -49,15 +54,15 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 			// Ignore methods not created by the developer himself
 			return;
 		}
-		
+
 		// Ignore constructors for anonymous classes, they can't be declared / overridden
-		if (xMethod.getName().equals("<init>")) {
+		if ("<init>".equals(xMethod.getName())) {
 			final Matcher matcher = ANONYMOUS_CLASSNAME_PATTERN.matcher(getClassDescriptor().getClassName());
 			if (matcher.find()) {
 				return;
 			}
 		}
-		
+
 		// Enums have several false positives we need to ignore...
 		if (isEnumIgnoredMethod(xMethod)) {
 			return;
@@ -75,18 +80,18 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 	}
 
-	private boolean isEnumIgnoredMethod(final XMethod xMethod) {
+	private boolean isEnumIgnoredMethod(@Nonnull final XMethod xMethod) {
 		boolean checkForEnum = false;
 		final String methodName = xMethod.getName();
 		final String signature = xMethod.getSignature();
 		
 		// public static CCC[] values()
-		if (methodName.equals("values") && xMethod.isStatic() && xMethod.getNumParams() == 0) {
+		if ("values".equals(methodName) && xMethod.isStatic() && xMethod.getNumParams() == 0) {
 			checkForEnum = true;
 		}
 		
 		// public static CCC valueOf(String)
-		if (methodName.equals("valueOf") && xMethod.isStatic()
+		if ("valueOf".equals(methodName) && xMethod.isStatic()
 				&& signature.equals("(Ljava/lang/String;)L" + xMethod.getClassDescriptor().getClassName() + ";")) {
 			checkForEnum = true;
 		}
@@ -100,20 +105,25 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 
 	private boolean isCurrentClassAnEnum() {
 		// enums can't be put into hierarchies, they must extend java.lang.Enum directly
-		final ClassDescriptor superCD = getXClass().getSuperclassDescriptor();
-		if (superCD.getDottedClassName().equals("java.lang.Enum")) {
+
+		final XClass xclass = getXClass();
+		if (xclass == null) {
+			return false;
+		}
+		final ClassDescriptor superCD = xclass.getSuperclassDescriptor();
+		if ("java.lang.Enum".equals(superCD.getDottedClassName())) {
 			return true;
 		}
 
 		return false;
 	}
 
-	private void detectUnknownNullnessOfParameter(Method method,
-			TypeQualifierValue<?> nullness) {
+	private void detectUnknownNullnessOfParameter(@Nonnull final Method method,
+			@Nonnull final TypeQualifierValue<?> nullness) {
 		Type[] argumentTypes = method.getArgumentTypes();
 		int initialIndex = 0;
 
-		if (method.getName().equals("<init>")) {
+		if ("<init>".equals(method.getName())) {
 			if (method.getSignature().startsWith("(Ljava/lang/String;I")) {
 				// This may be an enum, in which case the first arg is inherited and can't be checked
 				if (isCurrentClassAnEnum()) {
@@ -141,24 +151,29 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 	}
 
-	/*
-	 * We can't use {@code Hierarchy2.findMatchingMethod} since it considers return types, which is incorrect
-	 * for Java, and just doesn't work with generics. 
+	@Nonnull
+	private static Set<XMethod> findSuperMethods(@Nonnull final XMethod m) {
+	 /*
+	    We can't use {@code Hierarchy2.findMatchingMethod} since it considers return types, which is incorrect
+	    for Java, and just doesn't work with generics.
 	 */
-	public static Set<XMethod> findSuperMethods(final XMethod m) {
 		final Set<XMethod> result = new HashSet<XMethod>();
 		findSuperMethods(m.getClassDescriptor(), m, result, Collections.<String, String>emptyMap());
 		result.remove(m);
 		return result;
 	}
 
+	@Nonnull
 	private static Map<String, String> getBoundGenericsInClassSignature(@Nonnull final ClassDescriptor c,
 			@Nonnull final Map<String, String> parentBoundGenerics) {
 		try {
 			final XClass xc = c.getXClass();
-			if (xc.getSuperclassDescriptor() == null) {
+
+			final ClassDescriptor superClassDescriptor = xc.getSuperclassDescriptor();
+			if (superClassDescriptor == null) {
 				return Collections.emptyMap();
 			}
+			final XClass superxc = superClassDescriptor.getXClass();
 
 			final String sourceSignature = xc.getSourceSignature();
 
@@ -175,7 +190,6 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 						genericsStart + 1, sourceSignature.indexOf('>', genericsStart)).split(";");
 
 				// Get generics definitions on parent class
-				final XClass superxc = xc.getSuperclassDescriptor().getXClass();
 				extractGenericsFromSuperclass(parentBoundGenerics, generics,
 						boundValues, superxc);
 				
@@ -192,9 +206,9 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 	}
 
 	private static void extractGenericsFromSuperclass(
-			final Map<String, String> parentBoundGenerics,
-			final Map<String, String> generics, final String[] boundValues,
-			final XClass superxc) {
+			@Nonnull final Map<String, String> parentBoundGenerics,
+			@Nonnull final Map<String, String> generics, @Nonnull final String[] boundValues,
+			@Nonnull final XClass superxc) {
 		final String superSourceSignature = superxc.getSourceSignature();
 		if (superSourceSignature != null) {
 			final String[] configValues = superSourceSignature.substring(
@@ -221,8 +235,8 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 	}
 	
-	private static void findSuperMethods(final ClassDescriptor c, final XMethod m,
-			final Set<XMethod> accumulator, final Map<String, String> parentBoundGenerics) {
+	private static void findSuperMethods(@Nullable final ClassDescriptor c, @Nonnull final XMethod m,
+			@Nonnull final Set<XMethod> accumulator, @Nonnull final Map<String, String> parentBoundGenerics) {
 		if (c == null) {
 			return;
 		}
@@ -254,30 +268,31 @@ public class UnknownNullnessDetector extends BytecodeScanningDetector {
 		}
 	}
 	
-	private static boolean signaturesMatches(final XMethod superm, final XMethod m,
-			final Map<String, String> boundGenerics) {
+	private static boolean signaturesMatches(@Nonnull final XMethod superm, @Nonnull final XMethod m,
+			@Nonnull final Map<String, String> boundGenerics) {
 		// Are there generics?
-		if (superm.getSourceSignature() == null) {
+		String signature = superm.getSourceSignature();
+		if (signature == null) {
 			return getArgumentSignature(superm).equals(getArgumentSignature(m));
 		}
 		
 		// Replace all generics
-		String signature = superm.getSourceSignature();
 		for (final Entry<String, String> entry : boundGenerics.entrySet()) {
 			signature = signature.replaceAll("T" + Pattern.quote(entry.getKey()), Matcher.quoteReplacement(entry.getValue()));
 		}
 		final String actualSignature = m.getSourceSignature() == null ? m.getSignature() : m.getSourceSignature();
 		
-		return actualSignature.equals(signature);
+		return signature.equals(actualSignature);
 	}
 
-	private static String getArgumentSignature(final XMethod xm) {
+	@Nonnull
+	private static String getArgumentSignature(@Nonnull final XMethod xm) {
 		final String signature = xm.getSignature();
 		return signature.substring(0, signature.indexOf(')') + 1);
 	}
 
-	private void detectUnknowNullnessOfReturnedValue(Method method,
-			TypeQualifierValue<?> nullness) {
+	private void detectUnknowNullnessOfReturnedValue(@Nonnull final Method method,
+			@Nonnull final TypeQualifierValue<?> nullness) {
 		if (!(method.getReturnType() instanceof ReferenceType)) {
 			return;
 		}
