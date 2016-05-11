@@ -131,6 +131,31 @@ public class UnknownNullnessDetectorTest extends BaseDetectorTest {
 	}
 	
 	@Test
+	public void testUnannotatedComplexGenerics() throws Exception {
+		// Locate test code
+		final String[] files = {
+			getClassFilePath("samples/jsr305/nullness/ComplexGenerics"),
+			getClassFilePath("samples/jsr305/nullness/ComplexGenerics$BufferSubscriber"),
+			getClassFilePath("samples/jsr305/nullness/ComplexGenerics$BufferSubscriber$1"),
+		};
+		
+		final String[] classpathes = {
+			getJarFilePath("rxjava-1.0.16.jar"),
+		};
+		
+		// Run the analysis
+		analyze(files, classpathes, reporter);
+
+		verify(reporter, never()).doReportBug(
+			bugDefinition()
+				.bugType("UNKNOWN_NULLNESS_OF_PARAMETER")
+				.inClass("ComplexGenerics")
+				.inMethod("call")
+				.build()
+		);
+	}
+	
+	@Test
 	public void testUnannotatedExtendingLibClassPropagatingGenerics() throws Exception {
 		// Locate test code
 		final String[] files = {

@@ -3,7 +3,8 @@ package samples.jsr305.nullness;
 import java.util.HashMap;
 
 
-public class UnannotatedIndirectGenericBinding<A, B> extends HashMap<A, B> {
+// Used generic types are purposely evil
+public class UnannotatedIndirectGenericBinding<A, AA> extends HashMap<A, AA> {
 
 	private static final long serialVersionUID = 7026748794809094126L;
 
