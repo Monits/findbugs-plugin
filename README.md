@@ -1,4 +1,4 @@
-# Findbugs Plugins
+# Findbugs Plugin
 Findbugs plugin set from Monits. Removing bugs before they happen by enforcing best practices.
 
 [![Build Status](https://secure.travis-ci.org/Monits/findbugs-plugin.png)](http://travis-ci.org/Monits/findbugs-plugin)
@@ -42,9 +42,9 @@ and make sure to reference our public repositories
       </repositories>
 ```
 
-# history
+# History
 
-## 0.2.0-SNAPSHOT
+## 0.2.0
 New detectors:
 - added `InconsistentHashCodeEqualsDetector`: this new detector will check for
 classes that uses distinct fields in the calculation of `hashCode` and `equals`.
@@ -96,7 +96,7 @@ legit accesses.
 
 - First release
 
-# copyright and license
+# Copyright and License
 
     Copyright 2015 Monits S.A.
     Copyright 2013 Works Applications. Co.,Ltd.

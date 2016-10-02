@@ -47,6 +47,14 @@
 		<jdk.version>1.7</jdk.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>bintray</id>
+			<name>monits-bintray</name>
+			<url>https://api.bintray.com/maven/monits/monits-android/findbugs-plugin/;publish=1</url>
+		</repository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>monits-snapshots</id>
