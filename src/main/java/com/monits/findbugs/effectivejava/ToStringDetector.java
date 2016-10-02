@@ -170,9 +170,11 @@ public class ToStringDetector extends BytecodeScanningDetector {
 
 		if (suppressAnnotation != null) {
 			final Object[] values = (Object[]) suppressAnnotation.getValue("value");
-			for (final Object v : values) {
-				if (error.equals(v)) {
-					return true;
+			if (values != null) {
+				for (final Object v : values) {
+					if (error.equals(v)) {
+						return true;
+					}
 				}
 			}
 		}
