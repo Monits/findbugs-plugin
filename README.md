@@ -1,12 +1,13 @@
 # Findbugs Plugin
 Findbugs plugin set from Monits. Removing bugs before they happen by enforcing best practices.
 
-[![Build Status](https://secure.travis-ci.org/Monits/findbugs-plugin.png)](http://travis-ci.org/Monits/findbugs-plugin)
-[![Coverage Status](https://coveralls.io/repos/Monits/findbugs-plugin/badge.png)](https://coveralls.io/r/Monits/findbugs-plugin)
+[![Build Status](https://secure.travis-ci.org/Monits/findbugs-plugin.svg)](http://travis-ci.org/Monits/findbugs-plugin)
+[![Coverage Status](https://coveralls.io/repos/Monits/findbugs-plugin/badge.svg)](https://coveralls.io/r/Monits/findbugs-plugin)
+[![Download](https://api.bintray.com/packages/monits/monits-android/findbugs-plugin/images/download.svg) ](https://bintray.com/monits/monits-android/findbugs-plugin/_latestVersion)
 
-# how to use with Maven
+# How to use with Maven
 
-To use this product, please configure your findbugs-maven-plugin like below.
+To use this plugin, please configure your findbugs-maven-plugin like below.
 
 ```xml
       <plugin>
@@ -18,26 +19,21 @@ To use this product, please configure your findbugs-maven-plugin like below.
             <plugin>
               <groupId>com.monits</groupId>
               <artifactId>findbugs-plugin</artifactId>
-              <version>0.2.0-SNAPSHOT</version>
+              <version>0.2.0</version>
             </plugin>
           </plugins>
         </configuration>
       </plugin>
 ```
 
-and make sure to reference our public repositories
+and make sure to reference the repositories
 
 ```xml
       <repositories>
         <repository>
-          <id>monits-snapshots</id>
-          <url>http://nexus.monits.com/content/repositories/oss-snapshots/</url>
-          <name>Monits Snapshots</name>
-        </repository>
-        <repository>
-          <id>monits-releases</id>
-          <url>http://nexus.monits.com/content/repositories/oss-releases/</url>
-          <name>Monits Releases</name>
+          <id>bintray-monits</id>
+          <name>bintray</name>
+          <url>http://dl.bintray.com/monits/monits-android</url>
         </repository>
       </repositories>
 ```
