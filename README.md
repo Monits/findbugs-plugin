@@ -26,17 +26,7 @@ To use this plugin, please configure your findbugs-maven-plugin like below.
       </plugin>
 ```
 
-and make sure to reference the repositories
-
-```xml
-      <repositories>
-        <repository>
-          <id>bintray-monits</id>
-          <name>bintray</name>
-          <url>http://dl.bintray.com/monits/monits-android</url>
-        </repository>
-      </repositories>
-```
+We are both on **Central Repository** (formerly *Maven Central*) and **jcenter**.
 
 # History
 

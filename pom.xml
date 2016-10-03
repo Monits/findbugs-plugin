@@ -61,7 +61,7 @@
         <maven-project-info-reports-plugin.version>2.8</maven-project-info-reports-plugin.version>
         <maven-site-plugin.version>3.4</maven-site-plugin.version>
         <maven-findbugs-plugin.version>3.0.1</maven-findbugs-plugin.version>
-<!--        <findbugs-extensions-plugin.version>0.2.0-SNAPSHOT</findbugs-extensions-plugin.version> -->
+        <findbugs-extensions-plugin.version>0.2.0</findbugs-extensions-plugin.version>
         <fb-contrib.version>6.6.3</fb-contrib.version>
         <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
         <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
@@ -78,19 +78,6 @@
             <url>https://api.bintray.com/maven/monits/monits-android/findbugs-plugin/;publish=1</url>
         </repository>
     </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>monits-snapshots</id>
-            <url>http://nexus.monits.com/content/repositories/oss-snapshots/</url>
-            <name>Monits Snapshots</name>
-        </repository>
-        <repository>
-            <id>monits-releases</id>
-            <url>http://nexus.monits.com/content/repositories/oss-releases/</url>
-            <name>Monits Releases</name>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
@@ -174,11 +161,11 @@
                     <effort>High</effort>
                     <xmlOutput>true</xmlOutput>
                     <plugins>
-<!--                        <plugin>
+                        <plugin>
                             <groupId>com.monits</groupId>
                             <artifactId>findbugs-plugin</artifactId>
                             <version>${findbugs-extensions-plugin.version}</version>
-                        </plugin>-->
+                        </plugin>
                         <plugin>
                             <groupId>com.mebigfatguy.fb-contrib</groupId>
                             <artifactId>fb-contrib</artifactId>
@@ -337,11 +324,11 @@
                     <effort>High</effort>
                     <xmlOutput>true</xmlOutput>
                     <plugins>
-<!--                        <plugin>
+                        <plugin>
                             <groupId>com.monits</groupId>
                             <artifactId>findbugs-plugin</artifactId>
                             <version>${findbugs-extensions-plugin.version}</version>
-                        </plugin>-->
+                        </plugin>
                         <plugin>
                             <groupId>com.mebigfatguy.fb-contrib</groupId>
                             <artifactId>fb-contrib</artifactId>
