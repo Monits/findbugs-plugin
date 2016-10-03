@@ -5,6 +5,7 @@ sudo: false
 cache:
   directories:
     - $HOME/.m2
+install: true #Override default build step for maven (bad Travis!)
 script:
   - mvn clean install -Dgpg.skip=true
 after_success:
