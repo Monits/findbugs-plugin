@@ -5,9 +5,10 @@ sudo: false
 cache:
   directories:
     - $HOME/.m2
-script: "mvn clean install"
+script:
+  - mvn clean install -Dgpg.skip=true
 after_success:
-  - mvn clean test jacoco:report coveralls:report
+  - mvn clean test jacoco:report coveralls:report -Dgpg.skip=true
 notifications:
   email:
     recipients:
