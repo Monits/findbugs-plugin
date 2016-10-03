@@ -3,6 +3,7 @@ Findbugs plugin set from Monits. Removing bugs before they happen by enforcing b
 
 [![Build Status](https://secure.travis-ci.org/Monits/findbugs-plugin.svg)](http://travis-ci.org/Monits/findbugs-plugin)
 [![Coverage Status](https://coveralls.io/repos/Monits/findbugs-plugin/badge.svg)](https://coveralls.io/r/Monits/findbugs-plugin)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.monits/findbugs-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.monits/findbugs-plugin)
 [![Download](https://api.bintray.com/packages/monits/monits-android/findbugs-plugin/images/download.svg) ](https://bintray.com/monits/monits-android/findbugs-plugin/_latestVersion)
 
 # How to use with Maven
